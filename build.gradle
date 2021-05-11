@@ -1,0 +1,87 @@
+buildscript {
+
+	ext.buildProps = file "build.properties"
+
+	buildProps.withReader {
+		def prop = new Properties()
+		prop.load(it)
+		ext.config = new ConfigSlurper().parse prop
+	}
+}
+
+plugins {
+    id "java-library"
+    id "eclipse"
+    id "com.palantir.launch-config" version "1.2.0"
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		url "https://files.minecraftforge.net/maven"
+	}
+	maven {
+		url "https://repo.u-team.info"
+	}
+}
+
+dependencies {
+	
+	implementation group: "org.apache.logging.log4j", name: "log4j-api", version: config.log4j.version
+	implementation group: "org.apache.logging.log4j", name: "log4j-core", version: config.log4j.version
+	implementation group: "org.apache.logging.log4j", name: "log4j-iostreams", version: config.log4j.version
+		
+	implementation group: "com.google.guava", name: "guava", version: config.guava.version
+	implementation group: "com.google.code.gson", name: "gson", version: config.gson.version
+}
+
+group = "net.hycrafthd"
+archivesBaseName = "minecraft_authenticator"
+version = "1.0.0-SNAPSHOT"
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(8)
+	}
+	withSourcesJar()
+	withJavadocJar()
+}
+
+sourceSets {
+    main {
+        java
+        resources
+    }
+}
+
+tasks.named("jar") {
+	archiveClassifier = ""
+	
+	from "LICENSE"
+	
+	manifest {
+		attributes(
+			"Implementation-Version": project.version,
+			"Implementation-Vendor": "HyCraftHD, Luc_ZZ",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		)
+	}
+}
+
+task runAuthenticator(type: JavaExec) {
+	def run = new File("${rootDir}/run")
+	if(!run.exists()) {
+		run.mkdirs()
+	}
+
+	main "net.hycrafthd.minecraft_authenticator.Main"
+	workingDir run
+}
+
+launchConfig {
+	includedTasks "runAuthenticator"
+}
