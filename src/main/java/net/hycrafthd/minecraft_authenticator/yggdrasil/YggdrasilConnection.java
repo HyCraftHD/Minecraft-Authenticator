@@ -47,23 +47,23 @@ public class YggdrasilConnection {
 		}
 	}
 	
-	public static Response<AuthenticateResponse> authenticate(AuthenticatePayload payload) {
+	public static YggdrasilResponse<AuthenticateResponse> authenticate(AuthenticatePayload payload) {
 		final String payloadString = GSON.toJson(payload);
 		
 		final String responseString;
 		try {
 			responseString = request(ENDPOINT_AUTHENTICATE, payloadString);
 		} catch (IOException ex) {
-			return new Response<>(ex);
+			return new YggdrasilResponse<>(ex);
 		}
 		
 		final Optional<ErrorResponse> errorResponse = findError(responseString);
 		if (errorResponse.isPresent()) {
-			return new Response<>(errorResponse.get());
+			return new YggdrasilResponse<>(errorResponse.get());
 		}
 		
 		final AuthenticateResponse response = GSON.fromJson(responseString, AuthenticateResponse.class);
-		return new Response<>(response);
+		return new YggdrasilResponse<>(response);
 	}
 	
 	private static Optional<ErrorResponse> findError(String responseString) {
