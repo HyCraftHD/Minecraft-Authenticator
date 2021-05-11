@@ -14,20 +14,19 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ErrorResponse;
 
 public class YggdrasilConnection {
 	
-	private static final String BASE_URL = "https://authserver.mojang.com";
-	
 	private static final String ENDPOINT_AUTHENTICATE = "authenticate";
 	
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	
 	private static String request(String endpoint, String payload) throws IOException {
-		final HttpURLConnection urlConnection = (HttpURLConnection) new URL(BASE_URL + "/" + endpoint).openConnection();
+		final HttpURLConnection urlConnection = (HttpURLConnection) new URL(Constants.YGGDRASIL_SERVICE + "/" + endpoint).openConnection();
 		urlConnection.setConnectTimeout(5000);
 		urlConnection.setReadTimeout(5000);
 		urlConnection.setInstanceFollowRedirects(false);
