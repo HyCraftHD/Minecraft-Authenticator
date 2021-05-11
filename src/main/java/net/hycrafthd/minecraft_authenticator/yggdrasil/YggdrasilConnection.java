@@ -18,11 +18,14 @@ import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ErrorResponse;
+import net.hycrafthd.minecraft_authenticator.yggdrasil.api.RefreshPayload;
+import net.hycrafthd.minecraft_authenticator.yggdrasil.api.RefreshResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ValidatePayload;
 
 public class YggdrasilConnection {
 	
 	private static final String ENDPOINT_AUTHENTICATE = "authenticate";
+	private static final String ENDPOINT_REFRESH = "refresh";
 	private static final String ENDPOINT_VALIDATE = "validate";
 	
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -64,6 +67,25 @@ public class YggdrasilConnection {
 		}
 		
 		final AuthenticateResponse response = GSON.fromJson(responseString, AuthenticateResponse.class);
+		return new YggdrasilResponse<>(response);
+	}
+	
+	public static YggdrasilResponse<RefreshResponse> refresh(RefreshPayload payload) {
+		final String payloadString = GSON.toJson(payload);
+		
+		final String responseString;
+		try {
+			responseString = request(ENDPOINT_REFRESH, payloadString).getResponse();
+		} catch (IOException ex) {
+			return new YggdrasilResponse<>(ex);
+		}
+		
+		final Optional<ErrorResponse> errorResponse = findError(responseString);
+		if (errorResponse.isPresent()) {
+			return new YggdrasilResponse<>(errorResponse.get());
+		}
+		
+		final RefreshResponse response = GSON.fromJson(responseString, RefreshResponse.class);
 		return new YggdrasilResponse<>(response);
 	}
 	
