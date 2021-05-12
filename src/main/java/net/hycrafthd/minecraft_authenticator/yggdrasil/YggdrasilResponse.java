@@ -28,11 +28,15 @@ public class YggdrasilResponse<T> {
 		this.exception = Optional.of(exception);
 	}
 	
+	public boolean hasSucessfulResponse() {
+		return response.isPresent();
+	}
+	
 	public Optional<T> getResponse() {
 		return response;
 	}
 	
-	public boolean hasError() {
+	public boolean hasErrorResponse() {
 		return errorResponse.isPresent();
 	}
 	
