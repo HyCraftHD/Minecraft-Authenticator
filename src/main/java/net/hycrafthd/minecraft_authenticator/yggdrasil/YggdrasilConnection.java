@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,11 +43,11 @@ public class YggdrasilConnection {
 		urlConnection.connect();
 		
 		try (final OutputStream outputStream = urlConnection.getOutputStream()) {
-			urlConnection.getOutputStream().write(payload.getBytes(Charsets.UTF_8));
+			urlConnection.getOutputStream().write(payload.getBytes(StandardCharsets.UTF_8));
 		}
 		
 		try (final InputStream inputStream = urlConnection.getResponseCode() >= 400 ? urlConnection.getErrorStream() : urlConnection.getInputStream()) {
-			return new HttpResponse(urlConnection.getResponseCode(), new String(ByteStreams.toByteArray(inputStream), Charsets.UTF_8));
+			return new HttpResponse(urlConnection.getResponseCode(), new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8));
 		}
 	}
 	
