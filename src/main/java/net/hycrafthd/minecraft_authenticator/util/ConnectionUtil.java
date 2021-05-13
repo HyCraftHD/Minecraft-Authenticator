@@ -10,6 +10,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+
+import net.hycrafthd.minecraft_authenticator.Constants;
 
 public class ConnectionUtil {
 	
@@ -29,8 +34,10 @@ public class ConnectionUtil {
 		urlConnection.setInstanceFollowRedirects(true);
 		urlConnection.setDoInput(true);
 		urlConnection.setRequestMethod("POST");
-		urlConnection.setRequestProperty("Charset", "UTF-8");
-		urlConnection.addRequestProperty("User-Agent", "Minecraft-Authenticator");
+		urlConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
+		urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+		urlConnection.addRequestProperty("User-Agent", Constants.USER_AGENT);
+		urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Content-Type", contentType);
 		
 		if (payload.hasContent()) {
@@ -46,12 +53,26 @@ public class ConnectionUtil {
 			}
 		}
 		
-		try (final InputStream inputStream = urlConnection.getInputStream()) {
+		try (final InputStream inputStream = getInputStream(urlConnection, HttpURLConnection::getInputStream)) {
 			return HttpResponse.fromStream(urlConnection.getResponseCode(), inputStream);
 		} catch (IOException ex) {
-			try (final InputStream inputStream = urlConnection.getErrorStream()) {
+			try (final InputStream inputStream = getInputStream(urlConnection, HttpURLConnection::getErrorStream)) {
 				return HttpResponse.fromStream(urlConnection.getResponseCode(), inputStream);
 			}
+		}
+	}
+	
+	private static InputStream getInputStream(HttpURLConnection urlConnection, FunctionWithIOException<HttpURLConnection, InputStream> function) throws IOException {
+		final String encoding = urlConnection.getContentEncoding();
+		
+		final InputStream inputStream = function.apply(urlConnection);
+		
+		if ("gzip".equalsIgnoreCase(encoding)) {
+			return new GZIPInputStream(inputStream);
+		} else if ("deflate".equalsIgnoreCase(encoding)) {
+			return new InflaterInputStream(inputStream, new Inflater(true));
+		} else {
+			return inputStream;
 		}
 	}
 	
