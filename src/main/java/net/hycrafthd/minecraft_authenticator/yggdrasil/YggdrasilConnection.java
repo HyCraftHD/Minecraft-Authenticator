@@ -21,22 +21,18 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ValidatePayload;
 
 public class YggdrasilConnection {
 	
-	private static final String ENDPOINT_AUTHENTICATE = "authenticate";
-	private static final String ENDPOINT_REFRESH = "refresh";
-	private static final String ENDPOINT_VALIDATE = "validate";
+	private static final Gson GSON = new GsonBuilder().create();
 	
-	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-	
-	private static HttpResponse request(String endpoint, String payload) throws IOException {
+	private static HttpResponse serviceRequest(String endpoint, String payload) throws IOException {
 		return ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.YGGDRASIL_SERVICE, endpoint), HttpPayload.fromString(payload));
 	}
 	
-	public static YggdrasilResponse<AuthenticateResponse> authenticate(AuthenticatePayload payload) {
+	private static <T> YggdrasilResponse<T> responseServiceRequest(String endpoint, Object payload, Class<T> responseClass) {
 		final String payloadString = GSON.toJson(payload);
 		
 		final String responseString;
 		try {
-			responseString = request(ENDPOINT_AUTHENTICATE, payloadString).getAsString();
+			responseString = serviceRequest(endpoint, payloadString).getAsString();
 		} catch (IOException ex) {
 			return new YggdrasilResponse<>(ex);
 		}
@@ -46,27 +42,25 @@ public class YggdrasilConnection {
 			return new YggdrasilResponse<>(errorResponse.get());
 		}
 		
-		final AuthenticateResponse response = GSON.fromJson(responseString, AuthenticateResponse.class);
+		final T response = GSON.fromJson(responseString, responseClass);
 		return new YggdrasilResponse<>(response);
 	}
 	
+	private static Optional<ErrorResponse> findError(String responseString) {
+		final JsonElement element = JsonParser.parseString(responseString);
+		if (element.isJsonObject() && element.getAsJsonObject().get("error") != null) {
+			return Optional.of(GSON.fromJson(responseString, ErrorResponse.class));
+		} else {
+			return Optional.empty();
+		}
+	}
+	
+	public static YggdrasilResponse<AuthenticateResponse> authenticate(AuthenticatePayload payload) {
+		return responseServiceRequest(Constants.YGGDRASIL_ENDPOINT_AUTHENTICATE, payload, AuthenticateResponse.class);
+	}
+	
 	public static YggdrasilResponse<RefreshResponse> refresh(RefreshPayload payload) {
-		final String payloadString = GSON.toJson(payload);
-		
-		final String responseString;
-		try {
-			responseString = request(ENDPOINT_REFRESH, payloadString).getAsString();
-		} catch (IOException ex) {
-			return new YggdrasilResponse<>(ex);
-		}
-		
-		final Optional<ErrorResponse> errorResponse = findError(responseString);
-		if (errorResponse.isPresent()) {
-			return new YggdrasilResponse<>(errorResponse.get());
-		}
-		
-		final RefreshResponse response = GSON.fromJson(responseString, RefreshResponse.class);
-		return new YggdrasilResponse<>(response);
+		return responseServiceRequest(Constants.YGGDRASIL_ENDPOINT_REFRESH, payload, RefreshResponse.class);
 	}
 	
 	public static YggdrasilResponse<Boolean> validate(ValidatePayload payload) {
@@ -74,7 +68,7 @@ public class YggdrasilConnection {
 		
 		final String responseString;
 		try {
-			final HttpResponse response = request(ENDPOINT_VALIDATE, payloadString);
+			final HttpResponse response = serviceRequest(Constants.YGGDRASIL_ENDPOINT_VALIDATE, payloadString);
 			responseString = response.getAsString();
 			if (response.getResponseCode() == 204) {
 				return new YggdrasilResponse<>(true);
@@ -90,12 +84,4 @@ public class YggdrasilConnection {
 		return new YggdrasilResponse<>(false);
 	}
 	
-	private static Optional<ErrorResponse> findError(String responseString) {
-		final JsonElement element = JsonParser.parseString(responseString);
-		if (element.isJsonObject() && element.getAsJsonObject().get("error") != null) {
-			return Optional.of(GSON.fromJson(responseString, ErrorResponse.class));
-		} else {
-			return Optional.empty();
-		}
-	}
 }
