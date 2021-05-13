@@ -3,8 +3,6 @@ package net.hycrafthd.minecraft_authenticator.yggdrasil;
 import java.io.IOException;
 import java.util.Optional;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -21,14 +19,12 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ValidatePayload;
 
 public class YggdrasilConnection {
 	
-	private static final Gson GSON = new GsonBuilder().create();
-	
 	private static HttpResponse serviceRequest(String endpoint, String payload) throws IOException {
 		return ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.YGGDRASIL_SERVICE, endpoint), HttpPayload.fromString(payload));
 	}
 	
 	private static <T> YggdrasilResponse<T> responseServiceRequest(String endpoint, Object payload, Class<T> responseClass) {
-		final String payloadString = GSON.toJson(payload);
+		final String payloadString = Constants.GSON.toJson(payload);
 		
 		final String responseString;
 		try {
@@ -42,14 +38,14 @@ public class YggdrasilConnection {
 			return new YggdrasilResponse<>(errorResponse.get());
 		}
 		
-		final T response = GSON.fromJson(responseString, responseClass);
+		final T response = Constants.GSON.fromJson(responseString, responseClass);
 		return new YggdrasilResponse<>(response);
 	}
 	
 	private static Optional<ErrorResponse> findError(String responseString) {
 		final JsonElement element = JsonParser.parseString(responseString);
 		if (element.isJsonObject() && element.getAsJsonObject().get("error") != null) {
-			return Optional.of(GSON.fromJson(responseString, ErrorResponse.class));
+			return Optional.of(Constants.GSON.fromJson(responseString, ErrorResponse.class));
 		} else {
 			return Optional.empty();
 		}
@@ -64,7 +60,7 @@ public class YggdrasilConnection {
 	}
 	
 	public static YggdrasilResponse<Boolean> validate(ValidatePayload payload) {
-		final String payloadString = GSON.toJson(payload);
+		final String payloadString = Constants.GSON.toJson(payload);
 		
 		final String responseString;
 		try {

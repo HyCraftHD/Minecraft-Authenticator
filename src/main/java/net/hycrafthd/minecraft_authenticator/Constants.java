@@ -1,8 +1,13 @@
 package net.hycrafthd.minecraft_authenticator;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class Constants {
 	
 	public static final String USER_AGENT = "Minecraft-Authenticator";
+	
+	public static final Gson GSON = new GsonBuilder().create();
 	
 	// Mojang Authentication
 	public static final String YGGDRASIL_SERVICE = "https://authserver.mojang.com";
