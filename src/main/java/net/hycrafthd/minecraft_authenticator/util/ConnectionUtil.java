@@ -43,11 +43,6 @@ public class ConnectionUtil {
 		urlConnection.setRequestProperty("Content-Type", contentType);
 		urlConnection.setFixedLengthStreamingMode(payload.getSize());
 		
-		System.out.println(urlConnection.getRequestProperties());
-		System.out.println(urlConnection.getRequestProperty("Content-Length"));
-		System.out.println(url);
-		System.out.println(contentType);
-		
 		urlConnection.connect();
 		
 		if (payload.hasContent()) {
@@ -84,7 +79,7 @@ public class ConnectionUtil {
 	}
 	
 	public static URL urlBuilder(String url, Map<String, Object> parameters) throws MalformedURLException {
-		return urlBuilder(url, null, Collections.emptyMap());
+		return urlBuilder(url, null, parameters);
 	}
 	
 	public static URL urlBuilder(String baseUrl, String path, Map<String, Object> parameters) throws MalformedURLException {
@@ -113,6 +108,7 @@ public class ConnectionUtil {
 			builder.append(urlEncode(entry.getValue()));
 			
 		}
+		
 		return new URL(builder.toString());
 	}
 	
