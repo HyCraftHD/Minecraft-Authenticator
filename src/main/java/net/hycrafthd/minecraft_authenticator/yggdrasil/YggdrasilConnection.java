@@ -1,20 +1,17 @@
 package net.hycrafthd.minecraft_authenticator.yggdrasil;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
+import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil;
+import net.hycrafthd.minecraft_authenticator.util.HttpPayload;
+import net.hycrafthd.minecraft_authenticator.util.HttpResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ErrorResponse;
@@ -31,24 +28,7 @@ public class YggdrasilConnection {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	
 	private static HttpResponse request(String endpoint, String payload) throws IOException {
-		final HttpURLConnection urlConnection = (HttpURLConnection) new URL(Constants.YGGDRASIL_SERVICE + "/" + endpoint).openConnection();
-		urlConnection.setConnectTimeout(5000);
-		urlConnection.setReadTimeout(5000);
-		urlConnection.setInstanceFollowRedirects(true);
-		urlConnection.setRequestMethod("POST");
-		urlConnection.setRequestProperty("Content-Type", "application/json");
-		urlConnection.setRequestProperty("Charset", "UTF-8");
-		urlConnection.addRequestProperty("User-Agent", "Minecraft-Authenticator");
-		urlConnection.setDoOutput(true);
-		urlConnection.connect();
-		
-		try (final OutputStream outputStream = urlConnection.getOutputStream()) {
-			urlConnection.getOutputStream().write(payload.getBytes(StandardCharsets.UTF_8));
-		}
-		
-		try (final InputStream inputStream = urlConnection.getResponseCode() >= 400 ? urlConnection.getErrorStream() : urlConnection.getInputStream()) {
-			return new HttpResponse(urlConnection.getResponseCode(), new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8));
-		}
+		return ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.YGGDRASIL_SERVICE, endpoint), HttpPayload.fromString(payload));
 	}
 	
 	public static YggdrasilResponse<AuthenticateResponse> authenticate(AuthenticatePayload payload) {
@@ -56,7 +36,7 @@ public class YggdrasilConnection {
 		
 		final String responseString;
 		try {
-			responseString = request(ENDPOINT_AUTHENTICATE, payloadString).getResponse();
+			responseString = request(ENDPOINT_AUTHENTICATE, payloadString).getAsString();
 		} catch (IOException ex) {
 			return new YggdrasilResponse<>(ex);
 		}
@@ -75,7 +55,7 @@ public class YggdrasilConnection {
 		
 		final String responseString;
 		try {
-			responseString = request(ENDPOINT_REFRESH, payloadString).getResponse();
+			responseString = request(ENDPOINT_REFRESH, payloadString).getAsString();
 		} catch (IOException ex) {
 			return new YggdrasilResponse<>(ex);
 		}
@@ -95,7 +75,7 @@ public class YggdrasilConnection {
 		final String responseString;
 		try {
 			final HttpResponse response = request(ENDPOINT_VALIDATE, payloadString);
-			responseString = response.getResponse();
+			responseString = response.getAsString();
 			if (response.getResponseCode() == 204) {
 				return new YggdrasilResponse<>(true);
 			}
@@ -118,24 +98,4 @@ public class YggdrasilConnection {
 			return Optional.empty();
 		}
 	}
-	
-	private static class HttpResponse {
-		
-		private final int responseCode;
-		private final String response;
-		
-		public HttpResponse(int responseCode, String response) {
-			this.responseCode = responseCode;
-			this.response = response;
-		}
-		
-		public int getResponseCode() {
-			return responseCode;
-		}
-		
-		public String getResponse() {
-			return response;
-		}
-	}
-	
 }

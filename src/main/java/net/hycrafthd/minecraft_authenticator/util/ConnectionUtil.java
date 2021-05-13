@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
@@ -74,6 +75,10 @@ public class ConnectionUtil {
 		} else {
 			return inputStream;
 		}
+	}
+	
+	public static URL urlBuilder(String baseUrl, String path) throws MalformedURLException {
+		return urlBuilder(baseUrl, path, Collections.emptyMap());
 	}
 	
 	public static URL urlBuilder(String baseUrl, String path, Map<String, Object> parameters) throws MalformedURLException {

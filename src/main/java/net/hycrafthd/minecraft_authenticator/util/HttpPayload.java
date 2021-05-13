@@ -26,7 +26,7 @@ public class HttpPayload {
 		outputStream.write(bytes);
 	}
 	
-	public HttpPayload fromString(String payload) {
+	public static HttpPayload fromString(String payload) {
 		return new HttpPayload(payload.getBytes(StandardCharsets.UTF_8));
 	}
 }
