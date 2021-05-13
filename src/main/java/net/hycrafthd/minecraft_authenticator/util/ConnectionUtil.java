@@ -23,8 +23,8 @@ public class ConnectionUtil {
 		return postRequest(url, "application/json", payload);
 	}
 	
-	public static HttpResponse urlEncodedRequest(URL url) throws IOException {
-		return postRequest(url, "application/x-www-form-urlencoded", HttpPayload.EMPTY);
+	public static HttpResponse urlEncodedRequest(URL url, Map<String, Object> parameters) throws IOException {
+		return postRequest(url, "application/x-www-form-urlencoded", HttpPayload.fromString(appendUrlEncodedParameters(new StringBuilder(), parameters).toString()));
 	}
 	
 	public static HttpResponse postRequest(URL url, String contentType, HttpPayload payload) throws IOException {
@@ -38,7 +38,7 @@ public class ConnectionUtil {
 		urlConnection.setRequestMethod("POST");
 		urlConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
-		urlConnection.addRequestProperty("User-Agent", Constants.USER_AGENT);
+		urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
 		urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Content-Type", contentType);
 		urlConnection.setFixedLengthStreamingMode(payload.getSize());
@@ -74,12 +74,12 @@ public class ConnectionUtil {
 		}
 	}
 	
-	public static URL urlBuilder(String baseUrl, String path) throws MalformedURLException {
-		return urlBuilder(baseUrl, path, Collections.emptyMap());
+	public static URL urlBuilder(String url) throws MalformedURLException {
+		return urlBuilder(url, null);
 	}
 	
-	public static URL urlBuilder(String url, Map<String, Object> parameters) throws MalformedURLException {
-		return urlBuilder(url, null, parameters);
+	public static URL urlBuilder(String baseUrl, String path) throws MalformedURLException {
+		return urlBuilder(baseUrl, path, Collections.emptyMap());
 	}
 	
 	public static URL urlBuilder(String baseUrl, String path, Map<String, Object> parameters) throws MalformedURLException {
@@ -95,21 +95,23 @@ public class ConnectionUtil {
 			builder.append("?");
 		}
 		
-		boolean needAnd = false;
+		appendUrlEncodedParameters(builder, parameters);
 		
+		return new URL(builder.toString());
+	}
+	
+	private static StringBuilder appendUrlEncodedParameters(StringBuilder builder, Map<String, Object> parameters) {
+		boolean needAnd = false;
 		for (final Map.Entry<String, Object> entry : parameters.entrySet()) {
 			if (needAnd) {
 				builder.append("&");
 			}
 			needAnd = true;
-			
 			builder.append(urlEncode(entry.getKey()));
 			builder.append("=");
 			builder.append(urlEncode(entry.getValue()));
-			
 		}
-		
-		return new URL(builder.toString());
+		return builder;
 	}
 	
 	private static String urlEncode(Object object) {
