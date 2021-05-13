@@ -34,17 +34,19 @@ public class ConnectionUtil {
 		urlConnection.setUseCaches(false);
 		urlConnection.setInstanceFollowRedirects(true);
 		urlConnection.setDoInput(true);
+		urlConnection.setDoOutput(true);
 		urlConnection.setRequestMethod("POST");
 		urlConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
 		urlConnection.addRequestProperty("User-Agent", Constants.USER_AGENT);
 		urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Content-Type", contentType);
+		urlConnection.setFixedLengthStreamingMode(payload.getSize());
 		
-		if (payload.hasContent()) {
-			urlConnection.setDoOutput(true);
-			urlConnection.setRequestProperty("Content-Length", Integer.toString(payload.getSize()));
-		}
+		System.out.println(urlConnection.getRequestProperties());
+		System.out.println(urlConnection.getRequestProperty("Content-Length"));
+		System.out.println(url);
+		System.out.println(contentType);
 		
 		urlConnection.connect();
 		
@@ -81,12 +83,18 @@ public class ConnectionUtil {
 		return urlBuilder(baseUrl, path, Collections.emptyMap());
 	}
 	
+	public static URL urlBuilder(String url, Map<String, Object> parameters) throws MalformedURLException {
+		return urlBuilder(url, null, Collections.emptyMap());
+	}
+	
 	public static URL urlBuilder(String baseUrl, String path, Map<String, Object> parameters) throws MalformedURLException {
 		final StringBuilder builder = new StringBuilder();
 		
 		builder.append(baseUrl);
-		builder.append("/");
-		builder.append(path);
+		if (path != null && !path.isEmpty()) {
+			builder.append("/");
+			builder.append(path);
+		}
 		
 		if (!parameters.isEmpty()) {
 			builder.append("?");
