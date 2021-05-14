@@ -3,17 +3,18 @@ package net.hycrafthd.minecraft_authenticator.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+
+import com.google.common.escape.Escaper;
+import com.google.common.net.UrlEscapers;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
 
@@ -24,7 +25,7 @@ public class ConnectionUtil {
 	}
 	
 	public static HttpResponse urlEncodedRequest(URL url, Map<String, Object> parameters) throws IOException {
-		return postRequest(url, "application/x-www-form-urlencoded", HttpPayload.fromString(appendUrlEncodedParameters(new StringBuilder(), parameters).toString()));
+		return postRequest(url, "application/x-www-form-urlencoded", HttpPayload.fromString(appendUrlEncodedParameters(new StringBuilder(), parameters, UrlEscapers.urlFormParameterEscaper()).toString()));
 	}
 	
 	public static HttpResponse postRequest(URL url, String contentType, HttpPayload payload) throws IOException {
@@ -75,11 +76,15 @@ public class ConnectionUtil {
 	}
 	
 	public static URL urlBuilder(String url) throws MalformedURLException {
-		return urlBuilder(url, null);
+		return urlBuilder(url, (String) null);
 	}
 	
 	public static URL urlBuilder(String baseUrl, String path) throws MalformedURLException {
 		return urlBuilder(baseUrl, path, Collections.emptyMap());
+	}
+	
+	public static URL urlBuilder(String url, Map<String, Object> parameters) throws MalformedURLException {
+		return urlBuilder(url, null, parameters);
 	}
 	
 	public static URL urlBuilder(String baseUrl, String path, Map<String, Object> parameters) throws MalformedURLException {
@@ -95,31 +100,27 @@ public class ConnectionUtil {
 			builder.append("?");
 		}
 		
-		appendUrlEncodedParameters(builder, parameters);
+		appendUrlEncodedParameters(builder, parameters, UrlEscapers.urlFragmentEscaper());
 		
 		return new URL(builder.toString());
 	}
 	
-	private static StringBuilder appendUrlEncodedParameters(StringBuilder builder, Map<String, Object> parameters) {
+	private static StringBuilder appendUrlEncodedParameters(StringBuilder builder, Map<String, Object> parameters, Escaper escaper) {
 		boolean needAnd = false;
 		for (final Map.Entry<String, Object> entry : parameters.entrySet()) {
 			if (needAnd) {
 				builder.append("&");
 			}
 			needAnd = true;
-			builder.append(urlEncode(entry.getKey()));
+			builder.append(escape(entry.getKey(), escaper));
 			builder.append("=");
-			builder.append(urlEncode(entry.getValue()));
+			builder.append(escape(entry.getValue(), escaper));
 		}
 		return builder;
 	}
 	
-	private static String urlEncode(Object object) {
-		try {
-			return URLEncoder.encode(object.toString(), StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException("UTF_8 encoding is not present");
-		}
+	private static String escape(Object object, Escaper escaper) {
+		return escaper.escape(object.toString());
 	}
 	
 }
