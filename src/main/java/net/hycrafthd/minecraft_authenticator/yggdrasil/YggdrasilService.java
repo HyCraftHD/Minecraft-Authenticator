@@ -30,16 +30,16 @@ public class YggdrasilService {
 		try {
 			responseString = serviceRequest(endpoint, payloadString).getAsString();
 		} catch (IOException ex) {
-			return new YggdrasilResponse<>(ex);
+			return YggdrasilResponse.ofException(ex);
 		}
 		
 		final Optional<ErrorResponse> errorResponse = findError(responseString);
 		if (errorResponse.isPresent()) {
-			return new YggdrasilResponse<>(errorResponse.get());
+			return YggdrasilResponse.ofError(errorResponse.get());
 		}
 		
 		final T response = Constants.GSON.fromJson(responseString, responseClass);
-		return new YggdrasilResponse<>(response);
+		return YggdrasilResponse.ofResponse(response);
 	}
 	
 	private static Optional<ErrorResponse> findError(String responseString) {
@@ -67,17 +67,17 @@ public class YggdrasilService {
 			final HttpResponse response = serviceRequest(Constants.YGGDRASIL_ENDPOINT_VALIDATE, payloadString);
 			responseString = response.getAsString();
 			if (response.getResponseCode() == 204) {
-				return new YggdrasilResponse<>(true);
+				return YggdrasilResponse.ofResponse(true);
 			}
 		} catch (IOException ex) {
-			return new YggdrasilResponse<>(ex);
+			return YggdrasilResponse.ofException(ex);
 		}
 		
 		final Optional<ErrorResponse> errorResponse = findError(responseString);
 		if (errorResponse.isPresent()) {
-			return new YggdrasilResponse<>(errorResponse.get());
+			return YggdrasilResponse.ofError(errorResponse.get());
 		}
-		return new YggdrasilResponse<>(false);
+		return YggdrasilResponse.ofResponse(false);
 	}
 	
 }

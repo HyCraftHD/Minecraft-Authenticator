@@ -1,5 +1,6 @@
 package net.hycrafthd.minecraft_authenticator.microsoft;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
@@ -9,15 +10,29 @@ import net.hycrafthd.minecraft_authenticator.util.Parameters;
 
 public class MicrosoftService {
 	
-	public static void authorizationCodeToToken() {
-		Parameters parameters = Parameters.create() //
+	public static URL generateOAuthLoginUrl() {
+		final Parameters parameters = Parameters.create() //
 				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
-				.add("code", "MYSDOFDOFOS") //
-				.add("grant_type", "authorization_code") //
-				.add("redirect_uri", Constants.MICROSOFT_REDIRECT_URL);
+				.add("response_type", "code") //
+				.add("scope", "XboxLive.signin offline_access") //
+				.add("redirect_uri", Constants.MICROSOFT_OAUTH_REDIRECT_URL);
 		
 		try {
-			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_TOKEN_SERVICE);
+			return ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_AUTHORIZE, parameters);
+		} catch (MalformedURLException ex) {
+			return null;
+		}
+	}
+	
+	public static void requestOAuthAuthorizationToken(String authorizationCode) {
+		final Parameters parameters = Parameters.create() //
+				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
+				.add("code", authorizationCode) //
+				.add("grant_type", "authorization_code") //
+				.add("redirect_uri", Constants.MICROSOFT_OAUTH_REDIRECT_URL);
+		
+		try {
+			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN);
 			
 			System.out.println(url);
 			
