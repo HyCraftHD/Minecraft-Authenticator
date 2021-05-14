@@ -16,7 +16,7 @@ import net.hycrafthd.minecraft_authenticator.util.Parameters;
 
 public class MicrosoftService {
 	
-	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponseServiceRequest(Parameters parameters) {
+	private static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponseServiceRequest(Parameters parameters) {
 		final String responseString;
 		try {
 			responseString = ConnectionUtil.urlEncodedRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), parameters).getAsString();
@@ -42,7 +42,7 @@ public class MicrosoftService {
 		}
 	}
 	
-	public static URL generateOAuthLoginUrl() {
+	public static URL oAuthLoginUrl() {
 		final Parameters parameters = Parameters.create() //
 				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
 				.add("response_type", "code") //
