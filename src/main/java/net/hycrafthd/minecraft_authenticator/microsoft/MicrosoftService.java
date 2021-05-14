@@ -12,13 +12,25 @@ import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil;
-import net.hycrafthd.minecraft_authenticator.util.HttpResponse;
 import net.hycrafthd.minecraft_authenticator.util.Parameters;
 
 public class MicrosoftService {
 	
-	private static HttpResponse oAuthTokenServiceRequest(Parameters parameters) throws IOException {
-		return ConnectionUtil.urlEncodedRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), parameters);
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponseServiceRequest(Parameters parameters) {
+		final String responseString;
+		try {
+			responseString = ConnectionUtil.urlEncodedRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), parameters).getAsString();
+		} catch (IOException ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
+		
+		final Optional<OAuthErrorResponse> errorResponse = findOAuthError(responseString);
+		if (errorResponse.isPresent()) {
+			return MicrosoftResponse.ofError(errorResponse.get());
+		}
+		
+		final OAuthTokenResponse response = Constants.GSON.fromJson(responseString, OAuthTokenResponse.class);
+		return MicrosoftResponse.ofResponse(response);
 	}
 	
 	private static Optional<OAuthErrorResponse> findOAuthError(String responseString) {
@@ -44,27 +56,25 @@ public class MicrosoftService {
 		}
 	}
 	
-	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> requestOAuthAuthorizationToken(String authorizationCode) {
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String authorizationCode) {
 		final Parameters parameters = Parameters.create() //
 				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
 				.add("code", authorizationCode) //
 				.add("grant_type", "authorization_code") //
 				.add("redirect_uri", Constants.MICROSOFT_OAUTH_REDIRECT_URL);
 		
-		final String responseString;
-		try {
-			responseString = oAuthTokenServiceRequest(parameters).getAsString();
-		} catch (IOException ex) {
-			return MicrosoftResponse.ofException(ex);
-		}
+		return oAuthResponseServiceRequest(parameters);
+	}
+	
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String refreshToken) {
+		final Parameters parameters = Parameters.create() //
+				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
+				.add("refresh_token", refreshToken) //
+				.add("grant_type", "refresh_token") //
+				.add("redirect_uri", Constants.MICROSOFT_OAUTH_REDIRECT_URL);
 		
-		final Optional<OAuthErrorResponse> errorResponse = findOAuthError(responseString);
-		if (errorResponse.isPresent()) {
-			return MicrosoftResponse.ofError(errorResponse.get());
-		}
+		return oAuthResponseServiceRequest(parameters);
 		
-		final OAuthTokenResponse response = Constants.GSON.fromJson(responseString, OAuthTokenResponse.class);
-		return MicrosoftResponse.ofResponse(response);
 	}
 	
 }
