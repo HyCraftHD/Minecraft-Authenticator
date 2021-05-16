@@ -11,7 +11,11 @@ import com.google.gson.JsonParser;
 import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil;
+import net.hycrafthd.minecraft_authenticator.util.HttpPayload;
+import net.hycrafthd.minecraft_authenticator.util.HttpResponse;
 import net.hycrafthd.minecraft_authenticator.util.Parameters;
 
 public class MicrosoftService {
@@ -19,7 +23,7 @@ public class MicrosoftService {
 	private static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponseServiceRequest(Parameters parameters) {
 		final String responseString;
 		try {
-			responseString = ConnectionUtil.urlEncodedRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), parameters).getAsString();
+			responseString = ConnectionUtil.urlEncodedRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), ConnectionUtil.JSON_CONTENT_TYPE, parameters).getAsString();
 		} catch (IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
@@ -75,6 +79,21 @@ public class MicrosoftService {
 		
 		return oAuthResponseServiceRequest(parameters);
 		
+	}
+	
+	public static MicrosoftResponse<XBLAuthenticateResponse, Integer> xblAuthenticate(XBLAuthenticatePayload payload) {
+		final String responseString;
+		try {
+			final HttpResponse response = ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)));
+			responseString = response.getAsString();
+			if (response.getResponseCode() >= 300) {
+				return MicrosoftResponse.ofError(response.getResponseCode());
+			}
+		} catch (IOException ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
+		final XBLAuthenticateResponse response = Constants.GSON.fromJson(responseString, XBLAuthenticateResponse.class);
+		return MicrosoftResponse.ofResponse(response);
 	}
 	
 }

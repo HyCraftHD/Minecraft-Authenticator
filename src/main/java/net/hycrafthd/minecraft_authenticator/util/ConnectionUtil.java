@@ -20,15 +20,18 @@ import net.hycrafthd.minecraft_authenticator.Constants;
 
 public class ConnectionUtil {
 	
+	public static final String JSON_CONTENT_TYPE = "application/json";
+	public static final String URL_ENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
+	
 	public static HttpResponse jsonRequest(URL url, HttpPayload payload) throws IOException {
-		return postRequest(url, "application/json", payload);
+		return postRequest(url, JSON_CONTENT_TYPE, JSON_CONTENT_TYPE, payload);
 	}
 	
-	public static HttpResponse urlEncodedRequest(URL url, Map<String, Object> parameters) throws IOException {
-		return postRequest(url, "application/x-www-form-urlencoded", HttpPayload.fromString(appendUrlEncodedParameters(new StringBuilder(), parameters, UrlEscapers.urlFormParameterEscaper()).toString()));
+	public static HttpResponse urlEncodedRequest(URL url, String acceptType, Map<String, Object> parameters) throws IOException {
+		return postRequest(url, URL_ENCODED_CONTENT_TYPE, acceptType, HttpPayload.fromString(appendUrlEncodedParameters(new StringBuilder(), parameters, UrlEscapers.urlFormParameterEscaper()).toString()));
 	}
 	
-	public static HttpResponse postRequest(URL url, String contentType, HttpPayload payload) throws IOException {
+	public static HttpResponse postRequest(URL url, String contentType, String acceptType, HttpPayload payload) throws IOException {
 		final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 		urlConnection.setConnectTimeout(15000);
 		urlConnection.setReadTimeout(15000);
@@ -39,6 +42,7 @@ public class ConnectionUtil {
 		urlConnection.setRequestMethod("POST");
 		urlConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+		urlConnection.setRequestProperty("Accept", acceptType);
 		urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
 		urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Content-Type", contentType);

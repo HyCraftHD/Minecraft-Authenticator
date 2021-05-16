@@ -33,7 +33,13 @@ public class HttpResponse {
 	}
 	
 	public static HttpResponse fromStream(int responseCode, InputStream inputStream) throws IOException {
-		return new HttpResponse(responseCode, ByteStreams.toByteArray(inputStream));
+		final byte[] bytes;
+		if (inputStream == null) {
+			bytes = new byte[0];
+		} else {
+			bytes = ByteStreams.toByteArray(inputStream);
+		}
+		return new HttpResponse(responseCode, bytes);
 	}
 	
 }

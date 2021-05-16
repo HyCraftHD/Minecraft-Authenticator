@@ -7,15 +7,15 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ErrorResponse;
 public class YggdrasilResponse<T> {
 	
 	public static <T> YggdrasilResponse<T> ofResponse(T response) {
-		return new YggdrasilResponse<>(Optional.of(response), Optional.empty(), Optional.empty());
+		return new YggdrasilResponse<>(Optional.ofNullable(response), Optional.empty(), Optional.empty());
 	}
 	
 	public static <T> YggdrasilResponse<T> ofError(ErrorResponse error) {
-		return new YggdrasilResponse<>(Optional.empty(), Optional.of(error), Optional.empty());
+		return new YggdrasilResponse<>(Optional.empty(), Optional.ofNullable(error), Optional.empty());
 	}
 	
 	public static <T, E> YggdrasilResponse<T> ofException(Throwable exception) {
-		return new YggdrasilResponse<>(Optional.empty(), Optional.empty(), Optional.of(exception));
+		return new YggdrasilResponse<>(Optional.empty(), Optional.empty(), Optional.ofNullable(exception));
 	}
 	
 	private final Optional<T> response;
