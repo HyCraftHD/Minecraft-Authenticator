@@ -13,6 +13,9 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticateResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeErrorResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeResponse;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil;
 import net.hycrafthd.minecraft_authenticator.util.HttpPayload;
 import net.hycrafthd.minecraft_authenticator.util.HttpResponse;
@@ -93,6 +96,24 @@ public class MicrosoftService {
 			return MicrosoftResponse.ofException(ex);
 		}
 		final XBLAuthenticateResponse response = Constants.GSON.fromJson(responseString, XBLAuthenticateResponse.class);
+		return MicrosoftResponse.ofResponse(response);
+	}
+	
+	public static MicrosoftResponse<XSTSAuthorizeResponse, XSTSAuthorizeErrorResponse> xstsAuthorize(XSTSAuthorizePayload payload) {
+		final String responseString;
+		try {
+			responseString = ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload))).getAsString();
+		} catch (IOException ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
+		
+		final JsonElement element = JsonParser.parseString(responseString);
+		if (element.isJsonObject() && element.getAsJsonObject().get("XErr") != null) {
+			final XSTSAuthorizeErrorResponse response = Constants.GSON.fromJson(responseString, XSTSAuthorizeErrorResponse.class);
+			return MicrosoftResponse.ofError(response);
+		}
+		
+		final XSTSAuthorizeResponse response = Constants.GSON.fromJson(responseString, XSTSAuthorizeResponse.class);
 		return MicrosoftResponse.ofResponse(response);
 	}
 	
