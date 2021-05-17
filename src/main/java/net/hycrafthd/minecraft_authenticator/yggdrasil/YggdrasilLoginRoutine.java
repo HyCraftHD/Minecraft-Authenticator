@@ -18,6 +18,7 @@ public class YggdrasilLoginRoutine {
 			throw new AuthenticationException("Cannot authenticate minecraft account because: " + authenticateResponse.getErrorResponse().get());
 		}
 		
+		// Check if minecraft has been bought
 		if (authenticateResponse.getResponse().get().getSelectedProfile() == null) {
 			throw new AuthenticationException("This account does not have bought minecraft");
 		}
@@ -33,6 +34,7 @@ public class YggdrasilLoginRoutine {
 			throw new AuthenticationException("Cannot refresh access token because: " + refreshResponse.getErrorResponse().get());
 		}
 		
+		// Check if minecraft has been bought
 		if (refreshResponse.getResponse().get().getSelectedProfile() == null) {
 			throw new AuthenticationException("This account does not have bought minecraft");
 		}
