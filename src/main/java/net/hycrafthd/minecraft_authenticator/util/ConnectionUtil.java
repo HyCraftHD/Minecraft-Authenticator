@@ -32,29 +32,38 @@ public class ConnectionUtil {
 	}
 	
 	public static HttpResponse postRequest(URL url, String contentType, String acceptType, HttpPayload payload) throws IOException {
+		return basicRequest(url, acceptType, urlConnection -> {
+			urlConnection.setDoOutput(true);
+			urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
+			urlConnection.setRequestProperty("Content-Type", contentType);
+			urlConnection.setFixedLengthStreamingMode(payload.getSize());
+		}, urlConnection -> {
+			if (payload.hasContent()) {
+				try (final OutputStream outputStream = urlConnection.getOutputStream()) {
+					payload.write(outputStream);
+				}
+			}
+		});
+	}
+	
+	public static HttpResponse basicRequest(URL url, String acceptType, ConsumerWithIOException<HttpURLConnection> preConnect, ConsumerWithIOException<HttpURLConnection> postConnect) throws IOException {
 		final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 		urlConnection.setConnectTimeout(15000);
 		urlConnection.setReadTimeout(15000);
 		urlConnection.setUseCaches(false);
 		urlConnection.setInstanceFollowRedirects(true);
 		urlConnection.setDoInput(true);
-		urlConnection.setDoOutput(true);
 		urlConnection.setRequestMethod("POST");
 		urlConnection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 		urlConnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
 		urlConnection.setRequestProperty("Accept", acceptType);
 		urlConnection.setRequestProperty("User-Agent", Constants.USER_AGENT);
-		urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
-		urlConnection.setRequestProperty("Content-Type", contentType);
-		urlConnection.setFixedLengthStreamingMode(payload.getSize());
+		
+		preConnect.accept(urlConnection);
 		
 		urlConnection.connect();
 		
-		if (payload.hasContent()) {
-			try (final OutputStream outputStream = urlConnection.getOutputStream()) {
-				payload.write(outputStream);
-			}
-		}
+		postConnect.accept(urlConnection);
 		
 		try (final InputStream inputStream = getInputStream(urlConnection, HttpURLConnection::getInputStream)) {
 			return HttpResponse.fromStream(urlConnection.getResponseCode(), inputStream);
