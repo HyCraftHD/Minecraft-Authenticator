@@ -9,6 +9,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxPayload;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
@@ -114,6 +116,22 @@ public class MicrosoftService {
 		}
 		
 		final XSTSAuthorizeResponse response = Constants.GSON.fromJson(responseString, XSTSAuthorizeResponse.class);
+		return MicrosoftResponse.ofResponse(response);
+	}
+	
+	public static MicrosoftResponse<MinecraftLoginWithXBoxResponse, Integer> minecraftLoginWithXsts(MinecraftLoginWithXBoxPayload payload) {
+		final String responseString;
+		try {
+			final HttpResponse response = ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromGson(payload));
+			
+			responseString = response.getAsString();
+			
+			System.out.println(response.getResponseCode() + " -> " + responseString);// TODO catch error
+		} catch (IOException ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
+		
+		final MinecraftLoginWithXBoxResponse response = Constants.GSON.fromJson(responseString, MinecraftLoginWithXBoxResponse.class);
 		return MicrosoftResponse.ofResponse(response);
 	}
 	
