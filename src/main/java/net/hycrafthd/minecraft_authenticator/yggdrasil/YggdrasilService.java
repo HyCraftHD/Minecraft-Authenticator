@@ -20,7 +20,7 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ValidatePayload;
 public class YggdrasilService {
 	
 	private static HttpResponse serviceRequest(String endpoint, String payload) throws IOException {
-		return ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.YGGDRASIL_SERVICE, endpoint), HttpPayload.fromString(payload));
+		return ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.YGGDRASIL_SERVICE, endpoint), HttpPayload.fromString(payload));
 	}
 	
 	private static <T> YggdrasilResponse<T> responseServiceRequest(String endpoint, Object payload, Class<T> responseClass) {

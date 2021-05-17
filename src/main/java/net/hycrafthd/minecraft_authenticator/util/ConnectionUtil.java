@@ -23,11 +23,11 @@ public class ConnectionUtil {
 	public static final String JSON_CONTENT_TYPE = "application/json";
 	public static final String URL_ENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
 	
-	public static HttpResponse jsonRequest(URL url, HttpPayload payload) throws IOException {
+	public static HttpResponse jsonPostRequest(URL url, HttpPayload payload) throws IOException {
 		return postRequest(url, JSON_CONTENT_TYPE, JSON_CONTENT_TYPE, payload);
 	}
 	
-	public static HttpResponse urlEncodedRequest(URL url, String acceptType, Map<String, Object> parameters) throws IOException {
+	public static HttpResponse urlEncodedPostRequest(URL url, String acceptType, Map<String, Object> parameters) throws IOException {
 		return postRequest(url, URL_ENCODED_CONTENT_TYPE, acceptType, HttpPayload.fromString(appendUrlEncodedParameters(new StringBuilder(), parameters, UrlEscapers.urlFormParameterEscaper()).toString()));
 	}
 	

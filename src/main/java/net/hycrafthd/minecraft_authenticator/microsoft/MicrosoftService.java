@@ -28,7 +28,7 @@ public class MicrosoftService {
 	private static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponseServiceRequest(Parameters parameters) {
 		final String responseString;
 		try {
-			responseString = ConnectionUtil.urlEncodedRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), ConnectionUtil.JSON_CONTENT_TYPE, parameters).getAsString();
+			responseString = ConnectionUtil.urlEncodedPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), ConnectionUtil.JSON_CONTENT_TYPE, parameters).getAsString();
 		} catch (IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
@@ -89,7 +89,7 @@ public class MicrosoftService {
 	public static MicrosoftResponse<XBLAuthenticateResponse, Integer> xblAuthenticate(XBLAuthenticatePayload payload) {
 		final String responseString;
 		try {
-			final HttpResponse response = ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)));
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)));
 			responseString = response.getAsString();
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
@@ -104,7 +104,7 @@ public class MicrosoftService {
 	public static MicrosoftResponse<XSTSAuthorizeResponse, XSTSAuthorizeErrorResponse> xstsAuthorize(XSTSAuthorizePayload payload) {
 		final String responseString;
 		try {
-			responseString = ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload))).getAsString();
+			responseString = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload))).getAsString();
 		} catch (IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
@@ -122,7 +122,7 @@ public class MicrosoftService {
 	public static MicrosoftResponse<MinecraftLoginWithXBoxResponse, Integer> minecraftLoginWithXsts(MinecraftLoginWithXBoxPayload payload) {
 		final String responseString;
 		try {
-			final HttpResponse response = ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromGson(payload));
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromGson(payload));
 			responseString = response.getAsString();
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
