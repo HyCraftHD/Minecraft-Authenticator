@@ -18,15 +18,15 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeResponse
 
 public class MicrosoftLoginRoutine {
 	
-	public static User loginWithAuthCode(String authCode) throws AuthenticationException {
+	public static MicrosoftLoginResponse loginWithAuthCode(String authCode) throws AuthenticationException {
 		return login(MicrosoftService.oAuthTokenFromCode(authCode));
 	}
 	
-	public static User loginWithRefreshToken(String refreshToken) throws AuthenticationException {
+	public static MicrosoftLoginResponse loginWithRefreshToken(String refreshToken) throws AuthenticationException {
 		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken));
 	}
 	
-	private static User login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse) throws AuthenticationException {
+	private static MicrosoftLoginResponse login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse) throws AuthenticationException {
 		if (oAuthResponse.hasException()) {
 			throw new AuthenticationException("Cannot get oAuth token", oAuthResponse.getException().get());
 		} else if (oAuthResponse.hasErrorResponse()) {
@@ -73,7 +73,7 @@ public class MicrosoftLoginRoutine {
 			throw new AuthenticationException("Cannot get minecraft profile data because the service returned http code " + minecraftProfileResponse.getErrorResponse().get());
 		}
 		
-		return new User(minecraftProfileResponse.getResponse().get().getId(), minecraftProfileResponse.getResponse().get().getName(), minecraftLoginResponse.getResponse().get().getAccessToken(), "msa");
+		return new MicrosoftLoginResponse(new User(minecraftProfileResponse.getResponse().get().getId(), minecraftProfileResponse.getResponse().get().getName(), minecraftLoginResponse.getResponse().get().getAccessToken(), "msa"), oAuthResponse.getResponse().get().getRefreshToken());
 	}
 	
 }
