@@ -123,10 +123,10 @@ public class MicrosoftService {
 		final String responseString;
 		try {
 			final HttpResponse response = ConnectionUtil.jsonRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromGson(payload));
-			
 			responseString = response.getAsString();
-			
-			System.out.println(response.getResponseCode() + " -> " + responseString);// TODO catch error
+			if (response.getResponseCode() >= 300) {
+				return MicrosoftResponse.ofError(response.getResponseCode());
+			}
 		} catch (IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
