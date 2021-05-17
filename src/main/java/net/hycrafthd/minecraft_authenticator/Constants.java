@@ -26,4 +26,9 @@ public class Constants {
 	public static final String MICROSOFT_XBL_AUTHENTICATE_URL = "https://user.auth.xboxlive.com/user/authenticate";
 	public static final String MICROSOFT_XSTS_AUTHORIZE_URL = "https://xsts.auth.xboxlive.com/xsts/authorize";
 	
+	public static final String MICROSOFT_MINECRAFT_SERVICE = "https://api.minecraftservices.com";
+	public static final String MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN = "authentication/login_with_xbox";
+	public static final String MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED = "entitlements/mcstore";
+	public static final String MICROSOFT_MINECRAFT_ENDPOINT_PROFILE = "minecraft/profile";
+	
 }
