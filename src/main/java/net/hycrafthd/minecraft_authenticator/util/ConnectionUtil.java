@@ -27,19 +27,20 @@ public class ConnectionUtil {
 	};
 	
 	public static HttpResponse jsonPostRequest(URL url, HttpPayload payload) throws IOException {
-		return postRequest(url, JSON_CONTENT_TYPE, JSON_CONTENT_TYPE, payload);
+		return postRequest(url, JSON_CONTENT_TYPE, JSON_CONTENT_TYPE, payload, NO_OP);
 	}
 	
 	public static HttpResponse urlEncodedPostRequest(URL url, String acceptType, Map<String, Object> parameters) throws IOException {
-		return postRequest(url, acceptType, URL_ENCODED_CONTENT_TYPE, HttpPayload.fromString(createUrlEncodedParameters(parameters, UrlEscapers.urlFormParameterEscaper())));
+		return postRequest(url, acceptType, URL_ENCODED_CONTENT_TYPE, HttpPayload.fromString(createUrlEncodedParameters(parameters, UrlEscapers.urlFormParameterEscaper())), NO_OP);
 	}
 	
-	public static HttpResponse postRequest(URL url, String acceptType, String contentType, HttpPayload payload) throws IOException {
+	public static HttpResponse postRequest(URL url, String acceptType, String contentType, HttpPayload payload, ConsumerWithIOException<HttpURLConnection> preConnect) throws IOException {
 		return basicRequest(url, "POST", acceptType, urlConnection -> {
 			urlConnection.setDoOutput(true);
 			urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
 			urlConnection.setRequestProperty("Content-Type", contentType);
 			urlConnection.setFixedLengthStreamingMode(payload.getSize());
+			preConnect.accept(urlConnection);
 		}, urlConnection -> {
 			if (payload.hasContent()) {
 				try (final OutputStream outputStream = urlConnection.getOutputStream()) {
