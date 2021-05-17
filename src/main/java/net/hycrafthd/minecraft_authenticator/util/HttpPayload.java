@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import net.hycrafthd.minecraft_authenticator.Constants;
+
 public class HttpPayload {
 	
 	public static HttpPayload EMPTY = new HttpPayload(new byte[0]);
@@ -28,5 +30,9 @@ public class HttpPayload {
 	
 	public static HttpPayload fromString(String payload) {
 		return new HttpPayload(payload.getBytes(StandardCharsets.UTF_8));
+	}
+	
+	public static HttpPayload fromGson(Object payload) {
+		return fromString(Constants.GSON.toJson(payload));
 	}
 }
