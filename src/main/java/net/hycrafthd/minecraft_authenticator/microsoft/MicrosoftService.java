@@ -9,8 +9,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftHasPurchasedResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxPayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftProfileResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
@@ -132,6 +134,38 @@ public class MicrosoftService {
 		}
 		
 		final MinecraftLoginWithXBoxResponse response = Constants.GSON.fromJson(responseString, MinecraftLoginWithXBoxResponse.class);
+		return MicrosoftResponse.ofResponse(response);
+	}
+	
+	public static MicrosoftResponse<MinecraftHasPurchasedResponse, Integer> minecraftHasPurchased(String accessToken) {
+		final String responseString;
+		try {
+			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED), accessToken);
+			responseString = response.getAsString();
+			if (response.getResponseCode() >= 300) {
+				return MicrosoftResponse.ofError(response.getResponseCode());
+			}
+		} catch (IOException ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
+		
+		final MinecraftHasPurchasedResponse response = Constants.GSON.fromJson(responseString, MinecraftHasPurchasedResponse.class);
+		return MicrosoftResponse.ofResponse(response);
+	}
+	
+	public static MicrosoftResponse<MinecraftProfileResponse, Integer> minecraftProfile(String accessToken) {
+		final String responseString;
+		try {
+			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_PROFILE), accessToken);
+			responseString = response.getAsString();
+			if (response.getResponseCode() >= 300) {
+				return MicrosoftResponse.ofError(response.getResponseCode());
+			}
+		} catch (IOException ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
+		
+		final MinecraftProfileResponse response = Constants.GSON.fromJson(responseString, MinecraftProfileResponse.class);
 		return MicrosoftResponse.ofResponse(response);
 	}
 	

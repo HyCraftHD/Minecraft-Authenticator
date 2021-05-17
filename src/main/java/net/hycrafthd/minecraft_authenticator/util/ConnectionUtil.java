@@ -34,6 +34,12 @@ public class ConnectionUtil {
 		return postRequest(url, acceptType, URL_ENCODED_CONTENT_TYPE, HttpPayload.fromString(createUrlEncodedParameters(parameters, UrlEscapers.urlFormParameterEscaper())), NO_OP);
 	}
 	
+	public static HttpResponse bearerAuthorizationJsonGetRequest(URL url, String token) throws IOException {
+		return getRequest(url, JSON_CONTENT_TYPE, urlConnection -> {
+			urlConnection.setRequestProperty("Authorization", "Bearer " + token);
+		});
+	}
+	
 	public static HttpResponse postRequest(URL url, String acceptType, String contentType, HttpPayload payload, ConsumerWithIOException<HttpURLConnection> preConnect) throws IOException {
 		return basicRequest(url, "POST", acceptType, urlConnection -> {
 			urlConnection.setDoOutput(true);
