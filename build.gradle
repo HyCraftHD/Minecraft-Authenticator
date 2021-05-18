@@ -12,7 +12,8 @@ buildscript {
 plugins {
     id "java-library"
     id "eclipse"
-    id "com.palantir.launch-config" version "1.2.0"
+	id "maven-publish"
+    id "com.palantir.launch-config" version "1.2.0
 }
 
 repositories {
@@ -86,4 +87,76 @@ task runAuthenticator(type: JavaExec) {
 
 launchConfig {
 	includedTasks "runAuthenticator"
+}
+
+tasks.withType(PublishToMavenRepository) {
+	onlyIf {
+		getValue("mavenpass") != null
+	}
+}
+
+publishing {
+	publish.dependsOn build
+
+	repositories {
+		maven {
+			url "https://repo.u-team.info"
+			credentials {
+				username = "maven"
+				password = getValue("mavenpass")
+			}
+		}
+	}
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			
+			groupId = project.group
+			artifactId = project.archivesBaseName
+			version = project.version
+			
+			pom {
+				name = project.archivesBaseName
+				description = "Minecraft-Authenticator"
+				url = "https://github.com/HyCraftHD/Minecraft-Authenticator"
+				scm {
+					url = "https://github.com/HyCraftHD/Minecraft-Authenticator"
+					connection = "scm:git:git://github.com/HyCraftHD/Minecraft-Authenticator.git"
+					developerConnection = "scm:git:git@github.com:HyCraftHD/Minecraft-Authenticator.git"
+				}
+				
+				issueManagement {
+					system = "github"
+					url = "https://github.com/HyCraftHD/Minecraft-Authenticator/issues"
+				}
+				licenses {
+					license {
+						name = "ARR"
+						url = ""
+						distribution = "repo"
+					}
+				}
+				developers {
+					developer {
+						name = "HyCraftHD"
+					}
+					developer {
+						name = "Luc_ZZ"
+					}
+				}
+			}
+		}
+	}
+}
+
+def getValue(name) {
+	def envVariable = System.getenv(name)
+	if(envVariable != null) {
+		return envVariable
+	} else {
+		if (project.hasProperty(name)) {
+			return project.getProperty(name)
+		}
+	}
+	return null;
 }
