@@ -9,7 +9,7 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.api.RefreshResponse;
 
 public class YggdrasilLoginRoutine {
 	
-	public static YggdrasilLoginResponse loginWithUsername(String username, String password, String clientToken) throws YggdrasilAuthenticationException {
+	public static YggdrasilLoginResponse loginWithUsername(String username, String password, String clientToken) {
 		final YggdrasilResponse<AuthenticateResponse> authenticateResponse = YggdrasilService.authenticate(new AuthenticatePayload(new Agent("Minecraft", 1), username, password, clientToken, true));
 		if (authenticateResponse.hasException()) {
 			YggdrasilLoginResponse.ofError(new YggdrasilAuthenticationException("Cannot authenticate minecraft account", authenticateResponse.getException().get()));
@@ -19,13 +19,13 @@ public class YggdrasilLoginRoutine {
 		
 		// Check if minecraft has been bought
 		if (authenticateResponse.getResponse().get().getSelectedProfile() == null) {
-			throw new YggdrasilAuthenticationException("This account does not have bought minecraft");
+			YggdrasilLoginResponse.ofError(new YggdrasilAuthenticationException("This account does not have bought minecraft"));
 		}
 		
 		return YggdrasilLoginResponse.ofSuccess(new User(authenticateResponse.getResponse().get().getSelectedProfile().getId(), authenticateResponse.getResponse().get().getSelectedProfile().getName(), authenticateResponse.getResponse().get().getAccessToken(), "mojang"), authenticateResponse.getResponse().get().getAccessToken(), authenticateResponse.getResponse().get().getClientToken());
 	}
 	
-	public static YggdrasilLoginResponse loginWithAccessToken(String accessToken, String clientToken) throws YggdrasilAuthenticationException {
+	public static YggdrasilLoginResponse loginWithAccessToken(String accessToken, String clientToken) {
 		final YggdrasilResponse<RefreshResponse> refreshResponse = YggdrasilService.refresh(new RefreshPayload(accessToken, clientToken, true));
 		if (refreshResponse.hasException()) {
 			YggdrasilLoginResponse.ofError(new YggdrasilAuthenticationException("Cannot refresh access token", refreshResponse.getException().get()));
@@ -35,7 +35,7 @@ public class YggdrasilLoginRoutine {
 		
 		// Check if minecraft has been bought
 		if (refreshResponse.getResponse().get().getSelectedProfile() == null) {
-			throw new YggdrasilAuthenticationException("This account does not have bought minecraft");
+			YggdrasilLoginResponse.ofError(new YggdrasilAuthenticationException("This account does not have bought minecraft"));
 		}
 		
 		return YggdrasilLoginResponse.ofSuccess(new User(refreshResponse.getResponse().get().getSelectedProfile().getId(), refreshResponse.getResponse().get().getSelectedProfile().getName(), refreshResponse.getResponse().get().getAccessToken(), "mojang"), refreshResponse.getResponse().get().getAccessToken(), refreshResponse.getResponse().get().getClientToken());
