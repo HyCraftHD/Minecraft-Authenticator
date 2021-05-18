@@ -1,4 +1,4 @@
-package net.hycrafthd.minecraft_authenticator.yggdrasil;
+package net.hycrafthd.minecraft_authenticator.yggdrasil.service;
 
 import java.io.IOException;
 import java.util.Optional;

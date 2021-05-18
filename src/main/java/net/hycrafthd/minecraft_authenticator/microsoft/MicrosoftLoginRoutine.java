@@ -15,6 +15,8 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticateRespon
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 
 public class MicrosoftLoginRoutine {
 	

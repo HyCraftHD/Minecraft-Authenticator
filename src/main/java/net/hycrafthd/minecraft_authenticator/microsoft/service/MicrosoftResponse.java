@@ -1,4 +1,4 @@
-package net.hycrafthd.minecraft_authenticator.microsoft;
+package net.hycrafthd.minecraft_authenticator.microsoft.service;
 
 import java.util.Optional;
 

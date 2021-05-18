@@ -3,6 +3,8 @@ package net.hycrafthd.minecraft_authenticator.yggdrasil;
 import net.hycrafthd.minecraft_authenticator.login.User;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload.Agent;
+import net.hycrafthd.minecraft_authenticator.yggdrasil.service.YggdrasilResponse;
+import net.hycrafthd.minecraft_authenticator.yggdrasil.service.YggdrasilService;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.RefreshPayload;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.RefreshResponse;
