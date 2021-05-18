@@ -9,7 +9,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.util.PathConverter;
-import joptsimple.util.PathProperties;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationException;
 import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
@@ -20,7 +19,7 @@ public class Main {
 		final OptionParser parser = new OptionParser();
 		
 		final OptionSpec<Void> helpSpec = parser.accepts("help", "Show the help menu").forHelp();
-		final OptionSpec<Path> authFileSpec = parser.accepts("auth-file", "Authentication file output").withRequiredArg().required().withValuesConvertedBy(new PathConverter(PathProperties.NOT_EXISTING));
+		final OptionSpec<Path> authFileSpec = parser.accepts("auth-file", "Authentication file output").withRequiredArg().required().withValuesConvertedBy(new PathConverter());
 		
 		final OptionSet set = parser.parse(args);
 		
