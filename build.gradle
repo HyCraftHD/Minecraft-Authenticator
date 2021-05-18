@@ -80,6 +80,7 @@ task runAuthenticator(type: JavaExec) {
 	}
 
 	main "net.hycrafthd.minecraft_authenticator.Main"
+	args "--auth-file", "auth.json"
 	workingDir run
 }
 
