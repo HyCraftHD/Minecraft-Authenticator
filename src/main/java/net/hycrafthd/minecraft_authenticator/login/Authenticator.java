@@ -30,13 +30,13 @@ public class Authenticator {
 	
 	public static final class Builder {
 		
-		private final AuthenticationFileSupplier file;
+		private final AuthenticationFileSupplier fileSupplier;
 		private Path createAuthFile;
 		private Path updateAuthFile;
 		private boolean authenticate;
 		
-		private Builder(AuthenticationFileSupplier file) {
-			this.file = file;
+		private Builder(AuthenticationFileSupplier fileSupplier) {
+			this.fileSupplier = fileSupplier;
 		}
 		
 		public Builder shouldCreateAuthFile(Path path) {
@@ -55,26 +55,27 @@ public class Authenticator {
 		}
 		
 		public Authenticator build() {
-			return new Authenticator(file, createAuthFile, updateAuthFile, authenticate);
+			return new Authenticator(fileSupplier, createAuthFile, updateAuthFile, authenticate);
 		}
 		
 	}
 	
-	private final AuthenticationFileSupplier file;
+	private final AuthenticationFileSupplier fileSupplier;
 	private final Path createAuthFile;
 	private final Path updateAuthFile;
 	private final boolean authenticate;
 	
-	public Authenticator(AuthenticationFileSupplier file, Path createAuthFile, Path updateAuthFile, boolean authenticate) {
-		this.file = file;
+	public Authenticator(AuthenticationFileSupplier fileSupplier, Path createAuthFile, Path updateAuthFile, boolean authenticate) {
+		this.fileSupplier = fileSupplier;
 		this.createAuthFile = createAuthFile;
 		this.updateAuthFile = updateAuthFile;
 		this.authenticate = authenticate;
 	}
 	
 	public Optional<User> run() throws IOException, AuthenticationException {
+		final AuthenticationFile file = fileSupplier.get();
 		if (createAuthFile != null) {
-			AuthenticationUtil.writeAuthenticationFile(file.get(), createAuthFile);
+			AuthenticationUtil.writeAuthenticationFile(file, createAuthFile);
 		}
 		if (authenticate) {
 			if (file instanceof AuthenticationFile.Microsoft) {
