@@ -91,7 +91,7 @@ public class Authenticator {
 		final MicrosoftLoginResponse response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken());
 		
 		if (updateAuthFile != null && response.hasRefreshToken()) {
-			AuthenticationUtil.writeAuthenticationFile(new AuthenticationFile.Microsoft(response.getRefreshToken().get()), createAuthFile);
+			AuthenticationUtil.writeAuthenticationFile(new AuthenticationFile.Microsoft(response.getRefreshToken().get()), updateAuthFile);
 		}
 		if (response.hasException()) {
 			throw response.getException().get();
@@ -106,7 +106,7 @@ public class Authenticator {
 		final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken());
 		
 		if (updateAuthFile != null && response.hasAccessAndClientToken()) {
-			AuthenticationUtil.writeAuthenticationFile(new AuthenticationFile.Yggdrasil(response.getAccessToken().get(), response.getClientToken().get()), createAuthFile);
+			AuthenticationUtil.writeAuthenticationFile(new AuthenticationFile.Yggdrasil(response.getAccessToken().get(), response.getClientToken().get()), updateAuthFile);
 		}
 		if (response.hasException()) {
 			throw response.getException().get();
