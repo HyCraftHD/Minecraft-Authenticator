@@ -8,6 +8,7 @@ public class Constants {
 	public static final String USER_AGENT = "Minecraft-Authenticator";
 	
 	public static final Gson GSON = new GsonBuilder().create();
+	public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
 	
 	// Mojang Authentication
 	public static final String YGGDRASIL_SERVICE = "https://authserver.mojang.com";
@@ -30,5 +31,8 @@ public class Constants {
 	public static final String MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN = "authentication/login_with_xbox";
 	public static final String MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED = "entitlements/mcstore";
 	public static final String MICROSOFT_MINECRAFT_ENDPOINT_PROFILE = "minecraft/profile";
+	
+	// File warning
+	public static final String FILE_WARNING = "DO NOT SHARE THIS FILE. IT CONTAINS LOGIN INFORMATION FOR YOUR MINECRAFT ACCOUNT!";
 	
 }

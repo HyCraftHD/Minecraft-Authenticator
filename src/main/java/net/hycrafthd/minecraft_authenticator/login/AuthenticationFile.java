@@ -11,11 +11,11 @@ import com.google.gson.annotations.SerializedName;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile.AuthenticationFileDeserializer;
 
 @JsonAdapter(AuthenticationFileDeserializer.class)
-public class AuthenticationFile {
+public abstract class AuthenticationFile {
 	
 	private final Type type;
 	
-	public AuthenticationFile(Type type) {
+	private AuthenticationFile(Type type) {
 		this.type = type;
 	}
 	
@@ -35,12 +35,12 @@ public class AuthenticationFile {
 		MICROSOFT;
 	}
 	
-	public static class YggdrasilAuthenticationFile extends AuthenticationFile {
+	public static class Yggdrasil extends AuthenticationFile {
 		
 		private final String accessToken;
 		private final String clientToken;
 		
-		public YggdrasilAuthenticationFile(String accessToken, String clientToken) {
+		public Yggdrasil(String accessToken, String clientToken) {
 			super(Type.YGGDRASIL);
 			this.accessToken = accessToken;
 			this.clientToken = clientToken;
@@ -61,11 +61,11 @@ public class AuthenticationFile {
 		
 	}
 	
-	public static class MicrosoftAuthenticationFile extends AuthenticationFile {
+	public static class Microsoft extends AuthenticationFile {
 		
 		private final String refreshToken;
 		
-		public MicrosoftAuthenticationFile(String refreshToken) {
+		public Microsoft(String refreshToken) {
 			super(Type.MICROSOFT);
 			this.refreshToken = refreshToken;
 		}
@@ -88,9 +88,9 @@ public class AuthenticationFile {
 			final JsonObject object = json.getAsJsonObject();
 			final Type type = context.deserialize(object.get("type"), Type.class);
 			if (type == Type.YGGDRASIL) {
-				return new YggdrasilAuthenticationFile(object.get("accessToken").getAsString(), object.get("clientToken").getAsString());
+				return new Yggdrasil(object.get("accessToken").getAsString(), object.get("clientToken").getAsString());
 			} else if (type == Type.MICROSOFT) {
-				return new MicrosoftAuthenticationFile(object.get("refreshToken").getAsString());
+				return new Microsoft(object.get("refreshToken").getAsString());
 			}
 			throw new JsonParseException("Type must be 'yggdrasil' or 'microsoft'");
 		}
