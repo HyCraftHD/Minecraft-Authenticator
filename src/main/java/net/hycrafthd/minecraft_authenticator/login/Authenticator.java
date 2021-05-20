@@ -37,18 +37,19 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * <br>
  * For the first login you need a clientToken. This is a random uuid and should stay the same for all further requests.
  * Further more you need the username (email in most cases) and the password
+ * </p>
  * 
  * <pre>
  * try {
  * 	final Authenticator authenticator = Authenticator.ofYggdrasil(clientToken, username, password).shouldAuthenticate().run();
  * 	final AuthenticationFile file = authenticator.getResultFile();
- * 	final Optional<User> user = authenticator.getUser();
+ * 	final Optional user = authenticator.getUser();
  * 	// write authentication file e.g. with file.write(path)
  * } catch (AuthenticationException ex) {
  * 	ex.printStackTrace();
  * }
  * </pre>
- * 
+ * <p>
  * You get a {@link AuthenticationFile} and a {@link Optional} with a user if there was not error and you called
  * {@link Builder#shouldAuthenticate()} before. After that the {@link AuthenticationFile} should be stored somewhere for
  * reuse.
@@ -61,36 +62,38 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * like javafx) and let the user login. After that you will be redirected to a page where the authorization code is the
  * <big>code</big> url parameters. The url looks like this:
  * https://login.live.com/oauth20_desktop.srf?code=M.XYZTHISISMYCODE
+ * </p>
  * 
  * <pre>
  * try {
  * 	final Authenticator authenticator = Authenticator.ofMicrosoft(authorizationCode).shouldAuthenticate().run();
  * 	final AuthenticationFile file = authenticator.getResultFile();
- * 	final Optional<User> user = authenticator.getUser();
+ * 	final Optional user = authenticator.getUser();
  * 	// write authentication file e.g. with file.write(path)
  * } catch (AuthenticationException ex) {
  * 	ex.printStackTrace();
  * }
  * </pre>
- * 
+ * <p>
  * You get a {@link AuthenticationFile} and a {@link Optional} with a user if there was not error and you called
  * {@link Builder#shouldAuthenticate()} before. After that the {@link AuthenticationFile} should be stored somewhere for
  * reuse.
  * </p>
  * <p>
  * To refresh a session you can use the saved {@link AuthenticationFile} and login like that:
+ * </p>
  * 
  * <pre>
  * try {
  * 	final Authenticator authenticator = Authenticator.of(authFile).shouldAuthenticate().run();
  * 	final AuthenticationFile file = authenticator.getResultFile();
- * 	final Optional<User> user = authenticator.getUser();
+ * 	final Optional user = authenticator.getUser();
  * 	// write authentication file e.g. with file.write(path)
  * } catch (AuthenticationException ex) {
  * 	ex.printStackTrace();
  * }
  * </pre>
- * 
+ * <p>
  * After that save the returned {@link AuthenticationFile} again. The session should stay for a relative long time, but
  * will be destroyed by certain events e.g. other client token, logout of all sessions, etc. The error message will tell
  * you why the user cannot be authenticated. If a token is not valid anymore the user must relogin.
@@ -178,7 +181,7 @@ public class Authenticator {
 		 * {@link AuthenticationFile}
 		 * 
 		 * @return The authenticator object with the results
-		 * @throws AuthenticationException Throws exception of login was not successful
+		 * @throws AuthenticationException Throws exception if login was not successful
 		 */
 		public Authenticator run() throws AuthenticationException {
 			return new Authenticator(fileSupplier, authenticate);
@@ -194,7 +197,7 @@ public class Authenticator {
 	 * 
 	 * @param fileSupplier Supplier that returns {@link AuthenticationFile} for authentication
 	 * @param authenticate Should authenticate to get a {@link User} as a result
-	 * @throws AuthenticationException
+	 * @throws AuthenticationException Throws exception if authentication was not successful
 	 */
 	protected Authenticator(AuthenticationFileSupplier fileSupplier, boolean authenticate) throws AuthenticationException {
 		final AuthenticationFile file = fileSupplier.get();
@@ -271,7 +274,7 @@ public class Authenticator {
 		 * Returns the {@link AuthenticationFile}
 		 * 
 		 * @return {@link AuthenticationFile}
-		 * @throws AuthenticationException
+		 * @throws AuthenticationException Throws if authentication file is created with an online service with authentication
 		 */
 		AuthenticationFile get() throws AuthenticationException;
 	}
