@@ -12,6 +12,7 @@ import joptsimple.util.PathConverter;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationException;
 import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
+import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
 public class Main {
 	
@@ -42,7 +43,8 @@ public class Main {
 					System.out.println("Paste the code parameter of the returned url");
 					final String authCode = reader.readLine();
 					try {
-						Authenticator.of(authCode).shouldCreateAuthFile(authFile).build().run();
+						final Authenticator authenticator = Authenticator.ofMicrosoft(authCode).run();
+						AuthenticationUtil.writeAuthenticationFile(authenticator.getResultFile(), authFile);
 					} catch (IOException | AuthenticationException ex) {
 						throw new IllegalStateException("An error occured while trying to create auth file", ex);
 					}
@@ -57,7 +59,8 @@ public class Main {
 					final String clientToken = reader.readLine();
 					
 					try {
-						Authenticator.of(clientToken, username, password).shouldCreateAuthFile(authFile).build().run();
+						final Authenticator authenticator = Authenticator.ofYggdrasil(clientToken, username, password).run();
+						AuthenticationUtil.writeAuthenticationFile(authenticator.getResultFile(), authFile);
 					} catch (IOException | AuthenticationException ex) {
 						throw new IllegalStateException("An error occured while trying to create auth file", ex);
 					}
