@@ -18,9 +18,9 @@ buildscript {
 
 plugins {
     id "java-library"
-    id "eclipse"
+	id "eclipse"
 	id "maven-publish"
-    id "com.palantir.launch-config" version "1.2.0"
+	id "com.palantir.launch-config" version "1.2.0"
 }
 
 repositories {
