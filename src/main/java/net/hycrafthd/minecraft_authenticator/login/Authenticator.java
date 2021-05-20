@@ -178,7 +178,8 @@ public class Authenticator {
 		
 		/**
 		 * This runs the tasks that were selected. If {@link #shouldAuthenticate()} is not enabled it will only resolve the
-		 * {@link AuthenticationFile}
+		 * {@link AuthenticationFile}. This call is blocking and can take some time if the services take a long respond time.
+		 * The default timeout time is 15 seconds per service request.
 		 * 
 		 * @return The authenticator object with the results
 		 * @throws AuthenticationException Throws exception if login was not successful
