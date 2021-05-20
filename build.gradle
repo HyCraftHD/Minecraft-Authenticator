@@ -29,10 +29,6 @@ repositories {
 dependencies {
 	implementation group: "net.sf.jopt-simple", name: "jopt-simple", version: config.jopt_simple.version
 	
-	implementation group: "org.apache.logging.log4j", name: "log4j-api", version: config.log4j.version
-	implementation group: "org.apache.logging.log4j", name: "log4j-core", version: config.log4j.version
-	implementation group: "org.apache.logging.log4j", name: "log4j-iostreams", version: config.log4j.version
-		
 	implementation group: "com.google.guava", name: "guava", version: config.guava.version
 	implementation group: "com.google.code.gson", name: "gson", version: config.gson.version
 }
