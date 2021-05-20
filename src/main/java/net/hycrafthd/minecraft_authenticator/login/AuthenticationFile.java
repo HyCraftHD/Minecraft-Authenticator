@@ -1,5 +1,8 @@
 package net.hycrafthd.minecraft_authenticator.login;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -9,9 +12,14 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile.AuthenticationFileDeserializer;
+import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
 @JsonAdapter(AuthenticationFileDeserializer.class)
 public abstract class AuthenticationFile {
+	
+	public static AuthenticationFile read(Path path) throws IOException {
+		return AuthenticationUtil.readAuthenticationFile(path);
+	}
 	
 	private final Type type;
 	
@@ -21,6 +29,10 @@ public abstract class AuthenticationFile {
 	
 	public Type getType() {
 		return type;
+	}
+	
+	public void write(Path path) throws IOException {
+		AuthenticationUtil.writeAuthenticationFile(this, path);
 	}
 	
 	@Override
