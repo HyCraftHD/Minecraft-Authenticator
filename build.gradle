@@ -165,8 +165,8 @@ def getValue(name) {
 }
 
 task release {
-	tasks.uploadBoth.dependsOn build
-	tasks.uploadBoth.dependsOn publish
+	tasks.release.dependsOn build
+	tasks.release.dependsOn publish
 	doLast {
 		def git = org.eclipse.jgit.api.Git.open(file("${rootDir}"))
 		if(git != null) {
