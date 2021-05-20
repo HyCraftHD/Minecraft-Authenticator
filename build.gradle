@@ -56,13 +56,6 @@ java {
 	withJavadocJar()
 }
 
-sourceSets {
-    main {
-        java
-        resources
-    }
-}
-
 tasks.named("jar") {
 	archiveClassifier = ""
 	
