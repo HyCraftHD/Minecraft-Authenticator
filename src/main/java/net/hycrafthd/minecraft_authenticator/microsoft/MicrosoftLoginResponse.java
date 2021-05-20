@@ -2,9 +2,10 @@ package net.hycrafthd.minecraft_authenticator.microsoft;
 
 import java.util.Optional;
 
+import net.hycrafthd.minecraft_authenticator.login.LoginResponse;
 import net.hycrafthd.minecraft_authenticator.login.User;
 
-public class MicrosoftLoginResponse {
+public class MicrosoftLoginResponse implements LoginResponse<MicrosoftAuthenticationException> {
 	
 	public static MicrosoftLoginResponse ofSuccess(User user, String refreshToken) {
 		return new MicrosoftLoginResponse(Optional.of(user), Optional.of(refreshToken), Optional.empty());
@@ -24,10 +25,12 @@ public class MicrosoftLoginResponse {
 		this.exception = exception;
 	}
 	
+	@Override
 	public boolean hasUser() {
 		return user.isPresent();
 	}
 	
+	@Override
 	public Optional<User> getUser() {
 		return user;
 	}
@@ -40,10 +43,12 @@ public class MicrosoftLoginResponse {
 		return refreshToken;
 	}
 	
+	@Override
 	public boolean hasException() {
 		return exception.isPresent();
 	}
 	
+	@Override
 	public Optional<MicrosoftAuthenticationException> getException() {
 		return exception;
 	}

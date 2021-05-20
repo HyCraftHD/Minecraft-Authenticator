@@ -1,7 +1,5 @@
 package net.hycrafthd.minecraft_authenticator.login;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
@@ -16,37 +14,21 @@ public class Authenticator {
 		return new Builder(() -> file);
 	}
 	
-	public static Builder of(Path path) {
-		return new Builder(() -> AuthenticationUtil.readAuthenticationFile(path));
-	}
-	
-	public static Builder of(String authorizationCode) {
+	public static Builder ofMicrosoft(String authorizationCode) {
 		return new Builder(() -> AuthenticationUtil.createMicrosoftAuthenticationFile(authorizationCode));
 	}
 	
-	public static Builder of(String clientToken, String username, String password) {
+	public static Builder ofYggdrasil(String clientToken, String username, String password) {
 		return new Builder(() -> AuthenticationUtil.createYggdrasilAuthenticationFile(clientToken, username, password));
 	}
 	
 	public static final class Builder {
 		
 		private final AuthenticationFileSupplier fileSupplier;
-		private Path createAuthFile;
-		private Path updateAuthFile;
 		private boolean authenticate;
 		
 		private Builder(AuthenticationFileSupplier fileSupplier) {
 			this.fileSupplier = fileSupplier;
-		}
-		
-		public Builder shouldCreateAuthFile(Path path) {
-			createAuthFile = path;
-			return this;
-		}
-		
-		public Builder shouldUpdateAuthFile(Path path) {
-			updateAuthFile = path;
-			return this;
 		}
 		
 		public Builder shouldAuthenticate() {
@@ -54,73 +36,71 @@ public class Authenticator {
 			return this;
 		}
 		
-		public Authenticator build() {
-			return new Authenticator(fileSupplier, createAuthFile, updateAuthFile, authenticate);
+		public Authenticator run() throws AuthenticationException {
+			return new Authenticator(fileSupplier, authenticate);
 		}
 		
 	}
 	
-	private final AuthenticationFileSupplier fileSupplier;
-	private final Path createAuthFile;
-	private final Path updateAuthFile;
-	private final boolean authenticate;
+	private final AuthenticationFile resultFile;
+	private final Optional<User> user;
 	
-	public Authenticator(AuthenticationFileSupplier fileSupplier, Path createAuthFile, Path updateAuthFile, boolean authenticate) {
-		this.fileSupplier = fileSupplier;
-		this.createAuthFile = createAuthFile;
-		this.updateAuthFile = updateAuthFile;
-		this.authenticate = authenticate;
-	}
-	
-	public Optional<User> run() throws IOException, AuthenticationException {
+	public Authenticator(AuthenticationFileSupplier fileSupplier, boolean authenticate) throws AuthenticationException {
 		final AuthenticationFile file = fileSupplier.get();
-		if (createAuthFile != null) {
-			AuthenticationUtil.writeAuthenticationFile(file, createAuthFile);
-		}
+		
+		AuthenticationFile resultFile = file;
+		Optional<User> user = Optional.empty();
+		
+		// Authenticate with microsoft or yggdrasil
 		if (authenticate) {
+			final LoginResponse<? extends AuthenticationException> loginResponse;
+			
 			if (file instanceof AuthenticationFile.Microsoft) {
-				return runMicrosoftAuthentication((AuthenticationFile.Microsoft) file);
+				final AuthenticationFile.Microsoft microsoftFile = (AuthenticationFile.Microsoft) file;
+				final MicrosoftLoginResponse response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken());
+				
+				if (response.hasRefreshToken()) {
+					resultFile = new AuthenticationFile.Microsoft(response.getRefreshToken().get());
+				}
+				
+				loginResponse = response;
 			} else if (file instanceof AuthenticationFile.Yggdrasil) {
-				return runYggdrasilAuthentication((AuthenticationFile.Yggdrasil) file);
+				final AuthenticationFile.Yggdrasil yggdrasilFile = (AuthenticationFile.Yggdrasil) file;
+				final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken());
+				
+				if (response.hasAccessAndClientToken()) {
+					resultFile = new AuthenticationFile.Yggdrasil(response.getAccessToken().get(), response.getClientToken().get());
+				}
+				loginResponse = response;
+			} else {
+				throw new AuthenticationException(file + " is not a microsoft or a yggdrasil file");
 			}
+			
+			if (loginResponse.hasException()) {
+				throw loginResponse.getException().get();
+			}
+			if (!loginResponse.hasUser()) {
+				throw new AuthenticationException("After login there should be a user");
+			}
+			user = loginResponse.getUser();
 		}
-		return Optional.empty();
+		
+		this.resultFile = resultFile;
+		this.user = user;
 	}
 	
-	private Optional<User> runMicrosoftAuthentication(final AuthenticationFile.Microsoft microsoftFile) throws IOException, AuthenticationException {
-		final MicrosoftLoginResponse response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken());
-		
-		if (updateAuthFile != null && response.hasRefreshToken()) {
-			AuthenticationUtil.writeAuthenticationFile(new AuthenticationFile.Microsoft(response.getRefreshToken().get()), updateAuthFile);
-		}
-		if (response.hasException()) {
-			throw response.getException().get();
-		}
-		if (!response.hasUser()) {
-			throw new AuthenticationException("After login there should be a user");
-		}
-		return response.getUser();
+	public AuthenticationFile getResultFile() {
+		return resultFile;
 	}
 	
-	private Optional<User> runYggdrasilAuthentication(final AuthenticationFile.Yggdrasil yggdrasilFile) throws IOException, AuthenticationException {
-		final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken());
-		
-		if (updateAuthFile != null && response.hasAccessAndClientToken()) {
-			AuthenticationUtil.writeAuthenticationFile(new AuthenticationFile.Yggdrasil(response.getAccessToken().get(), response.getClientToken().get()), updateAuthFile);
-		}
-		if (response.hasException()) {
-			throw response.getException().get();
-		}
-		if (!response.hasUser()) {
-			throw new AuthenticationException("After login there should be a user");
-		}
-		return response.getUser();
+	public Optional<User> getUser() {
+		return user;
 	}
 	
 	@FunctionalInterface
 	private interface AuthenticationFileSupplier {
 		
-		AuthenticationFile get() throws IOException, AuthenticationException;
+		AuthenticationFile get() throws AuthenticationException;
 	}
 	
 }

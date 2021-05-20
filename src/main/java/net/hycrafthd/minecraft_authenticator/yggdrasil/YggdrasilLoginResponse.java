@@ -2,9 +2,10 @@ package net.hycrafthd.minecraft_authenticator.yggdrasil;
 
 import java.util.Optional;
 
+import net.hycrafthd.minecraft_authenticator.login.LoginResponse;
 import net.hycrafthd.minecraft_authenticator.login.User;
 
-public class YggdrasilLoginResponse {
+public class YggdrasilLoginResponse implements LoginResponse<YggdrasilAuthenticationException> {
 	
 	public static YggdrasilLoginResponse ofSuccess(User user, String accessToken, String clientToken) {
 		return new YggdrasilLoginResponse(Optional.of(user), Optional.of(accessToken), Optional.of(clientToken), Optional.empty());
@@ -26,10 +27,12 @@ public class YggdrasilLoginResponse {
 		this.exception = exception;
 	}
 	
+	@Override
 	public boolean hasUser() {
 		return user.isPresent();
 	}
 	
+	@Override
 	public Optional<User> getUser() {
 		return user;
 	}
@@ -46,10 +49,12 @@ public class YggdrasilLoginResponse {
 		return clientToken;
 	}
 	
+	@Override
 	public boolean hasException() {
 		return exception.isPresent();
 	}
 	
+	@Override
 	public Optional<YggdrasilAuthenticationException> getException() {
 		return exception;
 	}
