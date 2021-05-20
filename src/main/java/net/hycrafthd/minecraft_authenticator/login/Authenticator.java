@@ -98,27 +98,67 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  */
 public class Authenticator {
 	
+	/**
+	 * Creates an {@link Authenticator} of a {@link AuthenticationFile}.
+	 * 
+	 * @see Authenticator
+	 * @param file The {@link AuthenticationFile}
+	 * @return A {@link Builder} to condigure the authenticator
+	 */
 	public static Builder of(AuthenticationFile file) {
 		return new Builder(() -> file);
 	}
 	
+	/**
+	 * Creates a microsoft {@link Authenticator} with a microsoft authorization code. See examples in the class javadoc.
+	 * 
+	 * @see Authenticator
+	 * @param authorizationCode Microsoft authorization code of the redirect url
+	 * @return A {@link Builder} to condigure the authenticator
+	 */
 	public static Builder ofMicrosoft(String authorizationCode) {
 		return new Builder(() -> AuthenticationUtil.createMicrosoftAuthenticationFile(authorizationCode));
 	}
 	
+	/**
+	 * Creates a mojang {@link Authenticator} with a clientToken and the login credentials. See examples in the class
+	 * javadoc.
+	 * 
+	 * @see Authenticator
+	 * @param clientToken The client token. Should be the same for all request for one account after the first login
+	 * @param username The mojang username or email
+	 * @param password The mojang password
+	 * @return A {@link Builder} to condigure the authenticator
+	 */
 	public static Builder ofYggdrasil(String clientToken, String username, String password) {
 		return new Builder(() -> AuthenticationUtil.createYggdrasilAuthenticationFile(clientToken, username, password));
 	}
 	
+	/**
+	 * Returns the oAuth login url for microsoft accounts. After the webbrowser login the authorization code can be
+	 * extracted from the redirect url.
+	 * 
+	 * @see Authenticator
+	 * @return oAuth microsoft login url
+	 */
 	public static URL microsoftLogin() {
 		return MicrosoftService.oAuthLoginUrl();
 	}
 	
-	public static final class Builder {
+	/**
+	 * Internal builder class
+	 */
+	public static class Builder {
 		
 		private final AuthenticationFileSupplier fileSupplier;
 		private boolean authenticate;
 		
+		/**
+		 * Accepts a {@link AuthenticationFileSupplier} which is just a normal supplier for an {@link AuthenticationFile} which
+		 * can throw an {@link AuthenticationException}
+		 * 
+		 * @param fileSupplier Supplier that returns {@link AuthenticationFile} for authentication
+		 */
 		protected Builder(AuthenticationFileSupplier fileSupplier) {
 			this.fileSupplier = fileSupplier;
 		}
@@ -138,7 +178,7 @@ public class Authenticator {
 		 * {@link AuthenticationFile}
 		 * 
 		 * @return The authenticator object with the results
-		 * @throws AuthenticationException
+		 * @throws AuthenticationException Throws exception of login was not successful
 		 */
 		public Authenticator run() throws AuthenticationException {
 			return new Authenticator(fileSupplier, authenticate);
@@ -149,6 +189,13 @@ public class Authenticator {
 	private final AuthenticationFile resultFile;
 	private final Optional<User> user;
 	
+	/**
+	 * Internal constructor that runs the authentication
+	 * 
+	 * @param fileSupplier Supplier that returns {@link AuthenticationFile} for authentication
+	 * @param authenticate Should authenticate to get a {@link User} as a result
+	 * @throws AuthenticationException
+	 */
 	protected Authenticator(AuthenticationFileSupplier fileSupplier, boolean authenticate) throws AuthenticationException {
 		final AuthenticationFile file = fileSupplier.get();
 		
@@ -160,6 +207,7 @@ public class Authenticator {
 			final LoginResponse<? extends AuthenticationException> loginResponse;
 			
 			if (file instanceof AuthenticationFile.Microsoft) {
+				// Microsoft authentication
 				final AuthenticationFile.Microsoft microsoftFile = (AuthenticationFile.Microsoft) file;
 				final MicrosoftLoginResponse response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken());
 				
@@ -169,6 +217,7 @@ public class Authenticator {
 				
 				loginResponse = response;
 			} else if (file instanceof AuthenticationFile.Yggdrasil) {
+				// Mojang authentication
 				final AuthenticationFile.Yggdrasil yggdrasilFile = (AuthenticationFile.Yggdrasil) file;
 				final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken());
 				
@@ -180,6 +229,7 @@ public class Authenticator {
 				throw new AuthenticationException(file + " is not a microsoft or a yggdrasil file");
 			}
 			
+			// Validate authentication response
 			if (loginResponse.hasException()) {
 				throw loginResponse.getException().get();
 			}
@@ -193,17 +243,36 @@ public class Authenticator {
 		this.user = user;
 	}
 	
+	/**
+	 * Returns the updated {@link AuthenticationFile} if authentication was requested. Else returns the initial object.
+	 * 
+	 * @return {@link AuthenticationFile} that should be used for the next authentication.
+	 */
 	public AuthenticationFile getResultFile() {
 		return resultFile;
 	}
 	
+	/**
+	 * Returns the user if authentication was requested and no error occured.
+	 * 
+	 * @return Should not be empty if authentication was requested and not {@link AuthenticationException} was raised.
+	 */
 	public Optional<User> getUser() {
 		return user;
 	}
 	
+	/**
+	 * Supplier that returns an {@link AuthenticationFile} and can trow an {@link AuthenticationException}
+	 */
 	@FunctionalInterface
 	protected interface AuthenticationFileSupplier {
 		
+		/**
+		 * Returns the {@link AuthenticationFile}
+		 * 
+		 * @return {@link AuthenticationFile}
+		 * @throws AuthenticationException
+		 */
 		AuthenticationFile get() throws AuthenticationException;
 	}
 	
