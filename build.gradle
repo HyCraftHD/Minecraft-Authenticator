@@ -127,8 +127,8 @@ publishing {
 				}
 				licenses {
 					license {
-						name = "ARR"
-						url = ""
+						name = "Apache License 2.0"
+						url = "https://github.com/HyCraftHD/Minecraft-Authenticator/blob/main/LICENSE"
 						distribution = "repo"
 					}
 				}
