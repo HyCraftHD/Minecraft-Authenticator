@@ -7,6 +7,13 @@ buildscript {
 		prop.load(it)
 		ext.config = new ConfigSlurper().parse prop
 	}
+	
+	repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: "org.eclipse.jgit", name: "org.eclipse.jgit", version: "5.11.1.202105131744-r"
+    }
 }
 
 plugins {
@@ -155,4 +162,16 @@ def getValue(name) {
 		}
 	}
 	return null;
+}
+
+task release {
+	tasks.uploadBoth.dependsOn build
+	tasks.uploadBoth.dependsOn publish
+	doLast {
+		def git = org.eclipse.jgit.api.Git.open(file("${rootDir}"))
+		if(git != null) {
+			git.tag().setName(project.version).setForceUpdate(true).call()
+		}
+		println "Released, Need to push tags"
+	}
 }
