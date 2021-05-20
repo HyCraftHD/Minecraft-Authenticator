@@ -14,9 +14,21 @@ import com.google.gson.annotations.SerializedName;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile.AuthenticationFileDeserializer;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
+/**
+ * File that contains authentication information. This is currently either a {@link AuthenticationFile.Yggdrasil} or a
+ * {@link AuthenticationFile.Microsoft} instance.
+ */
 @JsonAdapter(AuthenticationFileDeserializer.class)
 public abstract class AuthenticationFile {
 	
+	/**
+	 * Read an {@link AuthenticationFile} from a path and returns an {@link AuthenticationFile} if file was found, readable
+	 * and a valid {@link AuthenticationFile}.
+	 * 
+	 * @param path Path to read the file
+	 * @return An {@link AuthenticationFile} instance
+	 * @throws IOException Errors if file is not found, readable or parsable
+	 */
 	public static AuthenticationFile read(Path path) throws IOException {
 		return AuthenticationUtil.readAuthenticationFile(path);
 	}
@@ -27,10 +39,16 @@ public abstract class AuthenticationFile {
 		this.type = type;
 	}
 	
-	public Type getType() {
-		return type;
-	}
-	
+	/**
+	 * Write this {@link AuthenticationFile} to a file if the file can be created and or is writable.
+	 * <p>
+	 * Attention: This file is in plain text and can be read by anyone that has this file. Even though this file does not
+	 * contain any credentials, this file contains tokens for refreshing your minecraft session that should be kept private!
+	 * </p>
+	 * 
+	 * @param path Path to write the file
+	 * @throws IOException Errors if file could not be created or written
+	 */
 	public void write(Path path) throws IOException {
 		AuthenticationUtil.writeAuthenticationFile(this, path);
 	}
