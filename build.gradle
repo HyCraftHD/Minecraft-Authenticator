@@ -26,9 +26,6 @@ plugins {
 repositories {
 	mavenCentral()
 	maven {
-		url "https://files.minecraftforge.net/maven"
-	}
-	maven {
 		url "https://repo.u-team.info"
 	}
 }
