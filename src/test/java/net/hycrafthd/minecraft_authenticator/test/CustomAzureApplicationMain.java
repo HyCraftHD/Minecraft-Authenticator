@@ -1,6 +1,5 @@
 package net.hycrafthd.minecraft_authenticator.test;
 
-import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -20,7 +19,9 @@ public class CustomAzureApplicationMain {
 		final int port = server.getLocalPort();
 		final String redirectUrl = AZURE_REDIRECT_URL.replace("{port}", Integer.toString(port));
 		
-		Desktop.getDesktop().browse(Authenticator.microsoftLogin(AZURE_CLIENT_ID, redirectUrl).toURI());
+		System.out.println(Authenticator.microsoftLogin(AZURE_CLIENT_ID, redirectUrl));
+		
+		// Desktop.getDesktop().browse(Authenticator.microsoftLogin(AZURE_CLIENT_ID, redirectUrl).toURI());
 		
 		final Socket socket = server.accept();
 		final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
