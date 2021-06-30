@@ -24,8 +24,16 @@ public class MicrosoftLoginRoutine {
 		return login(MicrosoftService.oAuthTokenFromCode(authCode));
 	}
 	
+	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, String authCode) {
+		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authCode));
+	}
+	
 	public static MicrosoftLoginResponse loginWithRefreshToken(String refreshToken) {
 		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken));
+	}
+	
+	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String refreshToken) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, refreshToken));
 	}
 	
 	private static MicrosoftLoginResponse login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse) {

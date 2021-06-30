@@ -72,21 +72,29 @@ public class MicrosoftService {
 	}
 	
 	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String authorizationCode) {
+		return oAuthTokenFromCode(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, authorizationCode);
+	}
+	
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String clientId, String redirectUrl, String authorizationCode) {
 		final Parameters parameters = Parameters.create() //
-				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
+				.add("client_id", clientId) //
 				.add("code", authorizationCode) //
 				.add("grant_type", "authorization_code") //
-				.add("redirect_uri", Constants.MICROSOFT_OAUTH_REDIRECT_URL);
+				.add("redirect_uri", redirectUrl);
 		
 		return oAuthResponseServiceRequest(parameters);
 	}
 	
 	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String refreshToken) {
+		return oAuthTokenFromRefreshToken(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, refreshToken);
+	}
+	
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String clientId, String redirectUrl, String refreshToken) {
 		final Parameters parameters = Parameters.create() //
-				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
+				.add("client_id", clientId) //
 				.add("refresh_token", refreshToken) //
 				.add("grant_type", "refresh_token") //
-				.add("redirect_uri", Constants.MICROSOFT_OAUTH_REDIRECT_URL);
+				.add("redirect_uri", redirectUrl);
 		
 		return oAuthResponseServiceRequest(parameters);
 		

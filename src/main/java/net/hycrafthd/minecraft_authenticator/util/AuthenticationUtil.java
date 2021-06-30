@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
@@ -42,8 +44,17 @@ public class AuthenticationUtil {
 		}
 	}
 	
-	public static AuthenticationFile.Microsoft createMicrosoftAuthenticationFile(String authorizationCode) throws MicrosoftAuthenticationException {
-		final MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> microsoftResponse = MicrosoftService.oAuthTokenFromCode(authorizationCode);
+	public static AuthenticationFile.Microsoft createMicrosoftAuthenticationFile(Optional<Entry<String, String>> customAzureApplication, String authorizationCode) throws MicrosoftAuthenticationException {
+		final MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> microsoftResponse;
+		if (customAzureApplication.isPresent()) {
+			final Entry<String, String> entry = customAzureApplication.get();
+			final String clientId = entry.getKey();
+			final String redirectUrl = entry.getValue();
+			microsoftResponse = MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authorizationCode);
+		} else {
+			microsoftResponse = MicrosoftService.oAuthTokenFromCode(authorizationCode);
+		}
+		
 		if (microsoftResponse.hasException()) {
 			throw new MicrosoftAuthenticationException("Cannot get oAuth token", microsoftResponse.getException().get());
 		} else if (microsoftResponse.hasErrorResponse()) {

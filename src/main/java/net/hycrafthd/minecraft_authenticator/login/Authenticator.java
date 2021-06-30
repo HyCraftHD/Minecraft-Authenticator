@@ -1,7 +1,9 @@
 package net.hycrafthd.minecraft_authenticator.login;
 
 import java.net.URL;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.AbstractMap.SimpleImmutableEntry;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
@@ -121,7 +123,7 @@ public class Authenticator {
 	 * @return A {@link Builder} to condigure the authenticator
 	 */
 	public static Builder ofMicrosoft(String authorizationCode) {
-		return new Builder(() -> AuthenticationUtil.createMicrosoftAuthenticationFile(authorizationCode));
+		return new Builder(customAzureApplication -> AuthenticationUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode));
 	}
 	
 	/**
@@ -180,8 +182,9 @@ public class Authenticator {
 	 */
 	public static class Builder {
 		
-		private final AuthenticationFileSupplier fileSupplier;
+		private final AuthenticationFileFunctionWithCustomAzureApplication fileFunction;
 		private boolean authenticate;
+		private Optional<Entry<String, String>> customAzureApplication;
 		
 		/**
 		 * Accepts a {@link AuthenticationFileSupplier} which is just a normal supplier for an {@link AuthenticationFile} which
@@ -190,7 +193,19 @@ public class Authenticator {
 		 * @param fileSupplier Supplier that returns {@link AuthenticationFile} for authentication
 		 */
 		protected Builder(AuthenticationFileSupplier fileSupplier) {
-			this.fileSupplier = fileSupplier;
+			this(customAzureApplication -> fileSupplier.get());
+		}
+		
+		/**
+		 * Accepts a {@link AuthenticationFileFunctionWithCustomAzureApplication} which supplies the custom azure application
+		 * values and returns a {@link AuthenticationFile} which can throw an {@link AuthenticationException}
+		 * 
+		 * @param fileFunction Function that returns {@link AuthenticationFile} for authentication
+		 */
+		protected Builder(AuthenticationFileFunctionWithCustomAzureApplication fileFunction) {
+			this.fileFunction = fileFunction;
+			authenticate = false;
+			customAzureApplication = Optional.empty();
 		}
 		
 		/**
@@ -204,6 +219,18 @@ public class Authenticator {
 		}
 		
 		/**
+		 * Call this if you have a custom azure application that will handle the oauth for microsoft accounts
+		 * 
+		 * @param clientId The azure client id
+		 * @param redirectUrl The redirect url
+		 * @return This builder
+		 */
+		public Builder customAzureApplication(String clientId, String redirectUrl) {
+			customAzureApplication = Optional.of(new SimpleImmutableEntry<>(clientId, redirectUrl));
+			return this;
+		}
+		
+		/**
 		 * This runs the tasks that were selected. If {@link #shouldAuthenticate()} is not enabled it will only resolve the
 		 * {@link AuthenticationFile}. This call is blocking and can take some time if the services take a long respond time.
 		 * The default timeout time is 15 seconds per service request.
@@ -212,7 +239,7 @@ public class Authenticator {
 		 * @throws AuthenticationException Throws exception if login was not successful
 		 */
 		public Authenticator run() throws AuthenticationException {
-			return new Authenticator(fileSupplier, authenticate);
+			return new Authenticator(fileFunction, authenticate, customAzureApplication);
 		}
 		
 	}
@@ -223,12 +250,13 @@ public class Authenticator {
 	/**
 	 * Internal constructor that runs the authentication
 	 * 
-	 * @param fileSupplier Supplier that returns {@link AuthenticationFile} for authentication
+	 * @param fileFunction Function that returns {@link AuthenticationFile} for authentication
 	 * @param authenticate Should authenticate to get a {@link User} as a result
+	 * @param customAzureApplication Optional value to pass custom azure application values
 	 * @throws AuthenticationException Throws exception if authentication was not successful
 	 */
-	protected Authenticator(AuthenticationFileSupplier fileSupplier, boolean authenticate) throws AuthenticationException {
-		final AuthenticationFile file = fileSupplier.get();
+	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, Optional<Entry<String, String>> customAzureApplication) throws AuthenticationException {
+		final AuthenticationFile file = fileFunction.get(customAzureApplication);
 		
 		AuthenticationFile resultFile = file;
 		Optional<User> user = Optional.empty();
@@ -240,7 +268,16 @@ public class Authenticator {
 			if (file instanceof AuthenticationFile.Microsoft) {
 				// Microsoft authentication
 				final AuthenticationFile.Microsoft microsoftFile = (AuthenticationFile.Microsoft) file;
-				final MicrosoftLoginResponse response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken());
+				
+				final MicrosoftLoginResponse response;
+				if (customAzureApplication.isPresent()) {
+					final Entry<String, String> entry = customAzureApplication.get();
+					final String clientId = entry.getKey();
+					final String redirectUrl = entry.getValue();
+					response = MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, microsoftFile.getRefreshToken());
+				} else {
+					response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken());
+				}
 				
 				if (response.hasRefreshToken()) {
 					resultFile = new AuthenticationFile.Microsoft(response.getRefreshToken().get());
@@ -305,6 +342,24 @@ public class Authenticator {
 		 * @throws AuthenticationException Throws if authentication file is created with an online service with authentication
 		 */
 		AuthenticationFile get() throws AuthenticationException;
+	}
+	
+	/**
+	 * Function that returns an {@link AuthenticationFile} and can trow an {@link AuthenticationException} and supplied the
+	 * custom azure application parameters
+	 */
+	@FunctionalInterface
+	protected interface AuthenticationFileFunctionWithCustomAzureApplication {
+		
+		/**
+		 * Returns the {@link AuthenticationFile}
+		 * 
+		 * @param customAzureApplication Custom azure application values that is needed to handle the oauth for microsoft
+		 *        accounts
+		 * @return {@link AuthenticationFile}
+		 * @throws AuthenticationException Throws if authentication file is created with an online service with authentication
+		 */
+		AuthenticationFile get(Optional<Entry<String, String>> customAzureApplication) throws AuthenticationException;
 	}
 	
 }
