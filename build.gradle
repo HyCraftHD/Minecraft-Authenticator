@@ -31,15 +31,13 @@ repositories {
 }
 
 dependencies {
-	implementation group: "net.sf.jopt-simple", name: "jopt-simple", version: config.jopt_simple.version
-	
 	implementation group: "com.google.guava", name: "guava", version: config.guava.version
 	implementation group: "com.google.code.gson", name: "gson", version: config.gson.version
 }
 
 group = "net.hycrafthd"
 archivesBaseName = "minecraft_authenticator"
-version = "1.0.0"
+version = "1.0.1"
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"

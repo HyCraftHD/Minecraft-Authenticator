@@ -4,11 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
-import joptsimple.util.PathConverter;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationException;
 import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
@@ -17,23 +14,12 @@ import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 public class Main {
 	
 	public static void main(String[] args) throws IOException {
-		final OptionParser parser = new OptionParser();
-		
-		final OptionSpec<Void> helpSpec = parser.accepts("help", "Show the help menu").forHelp();
-		final OptionSpec<Path> authFileSpec = parser.accepts("auth-file", "Authentication file output").withRequiredArg().required().withValuesConvertedBy(new PathConverter());
-		
-		final OptionSet set = parser.parse(args);
-		
-		if (set.has(helpSpec) || set.specs().size() < 1) {
-			parser.printHelpOn(System.out);
-			return;
-		}
-		
-		final Path authFile = set.valueOf(authFileSpec);
-		
 		System.out.println("This setup creates a auth file for further authentication without user input");
 		
 		try (final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+			System.out.println("Type the file path for the auth-file");
+			final String path = reader.readLine();
+			final Path authFile = Paths.get(path);
 			do {
 				System.out.println("Type 'microsoft' or 'mojang' for account type");
 				final String type = reader.readLine();
