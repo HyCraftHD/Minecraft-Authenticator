@@ -3,6 +3,7 @@ package net.hycrafthd.minecraft_authenticator.login;
 import java.net.URL;
 import java.util.Optional;
 
+import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
@@ -142,10 +143,22 @@ public class Authenticator {
 	 * extracted from the redirect url.
 	 * 
 	 * @see Authenticator
+	 * @see Authenticator#microsoftLoginRedirect()
 	 * @return oAuth microsoft login url
 	 */
 	public static URL microsoftLogin() {
 		return MicrosoftService.oAuthLoginUrl();
+	}
+	
+	/**
+	 * Return the oAuth redirect url. This returns the start of the redirect url and should be used to match the redirect
+	 * url and then to extract the authorization code.
+	 * 
+	 * @see Authenticator
+	 * @return oAuth microsoft redirect url
+	 */
+	public static String microsoftLoginRedirect() {
+		return Constants.MICROSOFT_OAUTH_REDIRECT_URL;
 	}
 	
 	/**
