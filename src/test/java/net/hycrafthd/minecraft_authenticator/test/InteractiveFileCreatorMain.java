@@ -11,7 +11,7 @@ import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
-public class CreateFileTestMain {
+public class InteractiveFileCreatorMain {
 	
 	public static void main(String[] args) throws IOException {
 		System.out.println("This setup creates a auth file for further authentication without user input");

@@ -70,18 +70,29 @@ tasks.named("jar") {
 	}
 }
 
-task runAuthenticator(type: JavaExec) {
+task runInteractiveFileCreator(type: JavaExec) {
 	def run = new File("${rootDir}/run")
 	if(!run.exists()) {
 		run.mkdirs()
 	}
 	
-	main "net.hycrafthd.minecraft_authenticator.test.CreateFileTestMain"
+	main "net.hycrafthd.minecraft_authenticator.test.InteractiveFileCreatorMain"
+	workingDir run
+}
+
+task runCustomAzureApplication(type: JavaExec) {
+	def run = new File("${rootDir}/run")
+	if(!run.exists()) {
+		run.mkdirs()
+	}
+	
+	main "net.hycrafthd.minecraft_authenticator.test.CustomAzureApplicationMain"
 	workingDir run
 }
 
 launchConfig {
-	includedTasks "runAuthenticator"
+	includedTasks "runInteractiveFileCreator"
+	includedTasks "runCustomAzureApplication"
 }
 
 tasks.withType(PublishToMavenRepository) {
