@@ -1,4 +1,4 @@
-package net.hycrafthd.minecraft_authenticator;
+package net.hycrafthd.minecraft_authenticator.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
-public class Main {
+public class CreateFileTestMain {
 	
 	public static void main(String[] args) throws IOException {
 		System.out.println("This setup creates a auth file for further authentication without user input");

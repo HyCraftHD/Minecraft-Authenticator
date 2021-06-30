@@ -43,6 +43,11 @@ tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 }
 
+sourceSets {
+	main
+	test
+}
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(8)
@@ -71,8 +76,7 @@ task runAuthenticator(type: JavaExec) {
 		run.mkdirs()
 	}
 	
-	main "net.hycrafthd.minecraft_authenticator.Main"
-	args "--auth-file", "auth.json"
+	main "net.hycrafthd.minecraft_authenticator.test.CreateFileTestMain"
 	workingDir run
 }
 
