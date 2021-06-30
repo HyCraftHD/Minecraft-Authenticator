@@ -139,8 +139,8 @@ public class Authenticator {
 	}
 	
 	/**
-	 * Returns the oAuth login url for microsoft accounts. After the webbrowser login the authorization code can be
-	 * extracted from the redirect url.
+	 * Returns the minecraft launcher oAuth login url for microsoft accounts. After the webbrowser login the authorization
+	 * code can be extracted from the redirect url.
 	 * 
 	 * @see Authenticator
 	 * @see Authenticator#microsoftLoginRedirect()
@@ -151,14 +151,28 @@ public class Authenticator {
 	}
 	
 	/**
-	 * Return the oAuth redirect url. This returns the start of the redirect url and should be used to match the redirect
-	 * url and then to extract the authorization code.
+	 * Return the minecraft launcher oAuth redirect url. This returns the start of the redirect url and should be used to
+	 * match the redirect url and then to extract the authorization code.
 	 * 
 	 * @see Authenticator
 	 * @return oAuth microsoft redirect url
 	 */
 	public static String microsoftLoginRedirect() {
 		return Constants.MICROSOFT_OAUTH_REDIRECT_URL;
+	}
+	
+	/**
+	 * Returns the oAuth login url for your custom azure application. You need to extract the authorization code of the
+	 * redirect url (depends on how you setup your azure application). If you dont want to use a custom azure application
+	 * look at {@link Authenticator#microsoftLogin()}.
+	 * 
+	 * @see Authenticator
+	 * @param clientId The azure client id
+	 * @param redirectUrl The configured redirect url
+	 * @return oAuth microsoft login url
+	 */
+	public static URL microsoftLogin(String clientId, String redirectUrl) {
+		return MicrosoftService.oAuthLoginUrl(clientId, redirectUrl);
 	}
 	
 	/**

@@ -54,11 +54,15 @@ public class MicrosoftService {
 	}
 	
 	public static URL oAuthLoginUrl() {
+		return oAuthLoginUrl(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL);
+	}
+	
+	public static URL oAuthLoginUrl(String clientId, String redirectUrl) {
 		final Parameters parameters = Parameters.create() //
-				.add("client_id", Constants.MICROSOFT_CLIENT_ID) //
+				.add("client_id", clientId) //
 				.add("response_type", "code") //
 				.add("scope", "XboxLive.signin offline_access") //
-				.add("redirect_uri", Constants.MICROSOFT_OAUTH_REDIRECT_URL);
+				.add("redirect_uri", redirectUrl);
 		
 		try {
 			return ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_AUTHORIZE, parameters);
