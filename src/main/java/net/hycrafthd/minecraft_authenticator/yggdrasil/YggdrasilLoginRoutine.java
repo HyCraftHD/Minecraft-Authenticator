@@ -4,16 +4,13 @@ import net.hycrafthd.minecraft_authenticator.login.User;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload.Agent;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.service.YggdrasilResponse;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.service.YggdrasilService;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.RefreshPayload;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.api.RefreshResponse;
+import net.hycrafthd.minecraft_authenticator.yggdrasil.service.YggdrasilService;
 
 public class YggdrasilLoginRoutine {
 	
 	public static YggdrasilLoginResponse loginWithUsername(String username, String password, String clientToken, TimeoutValues timeoutValues) {
-		final YggdrasilResponse<AuthenticateResponse> authenticateResponse = YggdrasilService.authenticate(new AuthenticatePayload(new Agent("Minecraft", 1), username, password, clientToken, true), timeoutValues);
+		final var authenticateResponse = YggdrasilService.authenticate(new AuthenticatePayload(new Agent("Minecraft", 1), username, password, clientToken, true), timeoutValues);
 		if (authenticateResponse.hasException()) {
 			return YggdrasilLoginResponse.ofError(new YggdrasilAuthenticationException("Cannot authenticate minecraft account", authenticateResponse.getException().get()));
 		} else if (authenticateResponse.hasErrorResponse()) {
@@ -29,7 +26,7 @@ public class YggdrasilLoginRoutine {
 	}
 	
 	public static YggdrasilLoginResponse loginWithAccessToken(String accessToken, String clientToken, TimeoutValues timeoutValues) {
-		final YggdrasilResponse<RefreshResponse> refreshResponse = YggdrasilService.refresh(new RefreshPayload(accessToken, clientToken, true), timeoutValues);
+		final var refreshResponse = YggdrasilService.refresh(new RefreshPayload(accessToken, clientToken, true), timeoutValues);
 		if (refreshResponse.hasException()) {
 			return YggdrasilLoginResponse.ofError(new YggdrasilAuthenticationException("Cannot refresh access token", refreshResponse.getException().get()));
 		} else if (refreshResponse.hasErrorResponse()) {
