@@ -65,6 +65,9 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * <p>
  * Here is an example to on how to login into a microsoft account: <br>
  * <br>
+ * This description only covers the basic oAuth for microsoft with the minecraft launcher id. If you want to customize
+ * the login you should create a custom azure application and use the custom azure authentication method
+ * {@link Builder#customAzureApplication(String, String)}. <br>
  * To log into a microsoft account you need the authorization code that you get after you log into your microsoft
  * account. First you need to open the {@link #microsoftLogin()} url in a browser (or in an integrated browser like
  * javafx) and let the user login. After that you will be redirected to a page where the authorization code is the
