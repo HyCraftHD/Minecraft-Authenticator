@@ -8,7 +8,6 @@ public class Constants {
 	public static final String USER_AGENT = "Minecraft-Authenticator";
 	
 	public static final Gson GSON = new GsonBuilder().create();
-	public static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
 	
 	// Mojang Authentication
 	public static final String YGGDRASIL_SERVICE = "https://authserver.mojang.com";

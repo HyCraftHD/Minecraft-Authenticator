@@ -34,7 +34,7 @@ public class AuthenticationUtil {
 		if (element.isJsonObject()) {
 			element.getAsJsonObject().addProperty("warning", Constants.FILE_WARNING);
 		}
-		final String json = Constants.GSON_PRETTY.toJson(element);
+		final String json = Constants.GSON.toJson(element);
 		outputStream.write(json.getBytes(StandardCharsets.UTF_8));
 	}
 	
