@@ -31,7 +31,7 @@ public class CustomAzureApplicationMain {
 			
 			System.out.println(authCode);
 			
-			final Authenticator authenticator = Authenticator.ofMicrosoft(authCode).customAzureApplication(AZURE_CLIENT_ID, redirectUrl).shouldAuthenticate().run();
+			final Authenticator authenticator = Authenticator.ofMicrosoft(authCode).customAzureApplication(AZURE_CLIENT_ID, redirectUrl).serviceConnectTimeout(5000).serviceReadTimeout(10000).shouldAuthenticate().run();
 			final User user = authenticator.getUser().get();
 			System.out.println(user);
 		}
