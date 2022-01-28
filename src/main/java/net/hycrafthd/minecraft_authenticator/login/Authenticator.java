@@ -1,9 +1,10 @@
 package net.hycrafthd.minecraft_authenticator.login;
 
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.AbstractMap.SimpleImmutableEntry;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.login.file.AuthenticationFile;
@@ -20,7 +21,7 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * <p>
  * Main class to authenticate a user with minecraft services. Currently mojang and microsoft accounts are supported.
  * <br>
- * First some information about yggdrasil and microsoft accounts
+ * First some information about yggdrasil and microsoft accounts:
  * </p>
  * <p>
  * For security reasons you should not store username or passwords. With the yggdrasil mojang accounts you are able to
@@ -29,7 +30,7 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * the access token for minecraft.
  * </p>
  * <p>
- * Microsoft accounts use oAuth. That is why you need to use a webbrowser to login with your microsoft account. You will
+ * Microsoft accounts use oAuth. That is why you need to use a browser to login with your microsoft account. You will
  * only get an authorization code which will be used for authentication. After the first login the
  * {@link AuthenticationFile} contains a refresh token which will be used for refreshing the authentication.
  * </p>
@@ -50,13 +51,13 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * 	final Authenticator authenticator = Authenticator.ofYggdrasil(clientToken, username, password).shouldAuthenticate().run();
  * 	final AuthenticationFile file = authenticator.getResultFile();
  * 	final Optional user = authenticator.getUser();
- * 	// write authentication file e.g. with file.write(path)
+ * 	// write authentication file e.g. with file.write(os)
  * } catch (AuthenticationException ex) {
  * 	ex.printStackTrace();
  * }
  * </pre>
  * <p>
- * You get a {@link AuthenticationFile} and a {@link Optional} with a user if there was not error and you called
+ * You get an {@link AuthenticationFile} and an {@link Optional} with a user if there was no error and you called
  * {@link Builder#shouldAuthenticate()} before. After that the {@link AuthenticationFile} should be stored somewhere for
  * reuse.
  * </p>
@@ -64,9 +65,9 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * Here is an example to on how to login into a microsoft account: <br>
  * <br>
  * To log into a microsoft account you need the authorization code that you get after you log into your microsoft
- * account. First you need to open the {@link #microsoftLogin()} url in a webbrowser (or in an integrated webbrowser
- * like javafx) and let the user login. After that you will be redirected to a page where the authorization code is the
- * <big>code</big> url parameters. The url looks like this:
+ * account. First you need to open the {@link #microsoftLogin()} url in a browser (or in an integrated browser like
+ * javafx) and let the user login. After that you will be redirected to a page where the authorization code is the
+ * <big>code</big> url parameter. The url looks like this:
  * https://login.live.com/oauth20_desktop.srf?code=M.XYZTHISISMYCODE
  * </p>
  * 
@@ -75,13 +76,13 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * 	final Authenticator authenticator = Authenticator.ofMicrosoft(authorizationCode).shouldAuthenticate().run();
  * 	final AuthenticationFile file = authenticator.getResultFile();
  * 	final Optional user = authenticator.getUser();
- * 	// write authentication file e.g. with file.write(path)
+ * 	// write authentication file e.g. with file.write(os)
  * } catch (AuthenticationException ex) {
  * 	ex.printStackTrace();
  * }
  * </pre>
  * <p>
- * You get a {@link AuthenticationFile} and a {@link Optional} with a user if there was not error and you called
+ * You get an {@link AuthenticationFile} and an {@link Optional} with a user if there was no error and you called
  * {@link Builder#shouldAuthenticate()} before. After that the {@link AuthenticationFile} should be stored somewhere for
  * reuse.
  * </p>
@@ -94,7 +95,7 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * 	final Authenticator authenticator = Authenticator.of(authFile).shouldAuthenticate().run();
  * 	final AuthenticationFile file = authenticator.getResultFile();
  * 	final Optional user = authenticator.getUser();
- * 	// write authentication file e.g. with file.write(path)
+ * 	// write authentication file e.g. with file.write(os)
  * } catch (AuthenticationException ex) {
  * 	ex.printStackTrace();
  * }
@@ -112,7 +113,7 @@ public class Authenticator {
 	 * 
 	 * @see Authenticator
 	 * @param file The {@link AuthenticationFile}
-	 * @return A {@link Builder} to condigure the authenticator
+	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder of(AuthenticationFile file) {
 		return new Builder(() -> file);
@@ -123,7 +124,7 @@ public class Authenticator {
 	 * 
 	 * @see Authenticator
 	 * @param authorizationCode Microsoft authorization code of the redirect url
-	 * @return A {@link Builder} to condigure the authenticator
+	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder ofMicrosoft(String authorizationCode) {
 		return new Builder(customAzureApplication -> AuthenticationUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode));
@@ -137,15 +138,15 @@ public class Authenticator {
 	 * @param clientToken The client token. Should be the same for all request for one account after the first login
 	 * @param username The mojang username or email
 	 * @param password The mojang password
-	 * @return A {@link Builder} to condigure the authenticator
+	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder ofYggdrasil(String clientToken, String username, String password) {
 		return new Builder(() -> AuthenticationUtil.createYggdrasilAuthenticationFile(clientToken, username, password));
 	}
 	
 	/**
-	 * Returns the minecraft launcher oAuth login url for microsoft accounts. After the webbrowser login the authorization
-	 * code can be extracted from the redirect url.
+	 * Returns the minecraft launcher oAuth login url for microsoft accounts. After the browser login the authorization code
+	 * can be extracted from the redirect url.
 	 * 
 	 * @see Authenticator
 	 * @see Authenticator#microsoftLoginRedirect()
@@ -168,7 +169,7 @@ public class Authenticator {
 	
 	/**
 	 * Returns the oAuth login url for your custom azure application. You need to extract the authorization code of the
-	 * redirect url (depends on how you setup your azure application). If you dont want to use a custom azure application
+	 * redirect url (depends on how you setup your azure application). If you don't want to use a custom azure application
 	 * look at {@link Authenticator#microsoftLogin()}.
 	 * 
 	 * @see Authenticator
@@ -188,6 +189,8 @@ public class Authenticator {
 		private final AuthenticationFileFunctionWithCustomAzureApplication fileFunction;
 		private boolean authenticate;
 		private Optional<Entry<String, String>> customAzureApplication;
+		private int serviceConnectTimeout;
+		private int serviceReadTimeout;
 		
 		/**
 		 * Accepts a {@link AuthenticationFileSupplier} which is just a normal supplier for an {@link AuthenticationFile} which
@@ -209,6 +212,8 @@ public class Authenticator {
 			this.fileFunction = fileFunction;
 			authenticate = false;
 			customAzureApplication = Optional.empty();
+			serviceConnectTimeout = 15000;
+			serviceReadTimeout = 15000;
 		}
 		
 		/**
@@ -234,9 +239,34 @@ public class Authenticator {
 		}
 		
 		/**
+		 * Configure the connect timeout of a service request. This timeout configures
+		 * {@link URLConnection#setConnectTimeout(int)} to the passed value for each service request
+		 * 
+		 * @param timeout Timeout in milliseconds
+		 * @return This builder
+		 */
+		public Builder serviceConnectTimeout(int timeout) {
+			serviceConnectTimeout = timeout;
+			return this;
+		}
+		
+		/**
+		 * Configure the read timeout of a service request. This timeout configures {@link URLConnection#setReadTimeout(int)} to
+		 * the passed value for each service request
+		 * 
+		 * @param timeout Timeout in milliseconds
+		 * @return This builder
+		 */
+		public Builder serviceReadTimeout(int timeout) {
+			serviceReadTimeout = timeout;
+			return this;
+		}
+		
+		/**
 		 * This runs the tasks that were selected. If {@link #shouldAuthenticate()} is not enabled it will only resolve the
 		 * {@link AuthenticationFile}. This call is blocking and can take some time if the services take a long respond time.
-		 * The default timeout time is 15 seconds per service request.
+		 * The default timeout time is 15 seconds per service request. Change the timeout for the services with
+		 * {@link #serviceConnectTimeout(int)} and {@link #serviceReadTimeout(int)}
 		 * 
 		 * @return The authenticator object with the results
 		 * @throws AuthenticationException Throws exception if login was not successful

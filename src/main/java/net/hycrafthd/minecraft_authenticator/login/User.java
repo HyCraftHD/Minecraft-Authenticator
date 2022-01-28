@@ -1,7 +1,7 @@
 package net.hycrafthd.minecraft_authenticator.login;
 
 /**
- * This class is the result of the authentication and contains Minecraft access token with profile data
+ * This class is the result of the authentication and contains the minecraft access token with profile data
  */
 public class User {
 	
