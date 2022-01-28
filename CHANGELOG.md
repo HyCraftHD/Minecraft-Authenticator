@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2022-01-28
+### Added
+ - Added timeout values in authentication builder
+ 
+### Changed
+ - Cleanup javadocs
+ - Update to java 17
+ - Update dependencies
+
 ## [1.0.1] - 2021-06-30
 ### Added
  - Added support for custom azure applications
