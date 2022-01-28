@@ -1,13 +1,13 @@
 buildscript {
-
+	
 	ext.buildProps = file "build.properties"
-
+	
 	buildProps.withReader {
 		def prop = new Properties()
 		prop.load(it)
 		ext.config = new ConfigSlurper().parse prop
 	}
-
+	
 	repositories {
 		mavenCentral()
 	}
@@ -58,9 +58,9 @@ java {
 
 tasks.named("jar") {
 	archiveClassifier = ""
-
+	
 	from "LICENSE"
-
+	
 	manifest {
 		attributes (
 				"Implementation-Version": project.version,
@@ -75,7 +75,7 @@ task runInteractiveFileCreator(type: JavaExec) {
 	if(!run.exists()) {
 		run.mkdirs()
 	}
-
+	
 	main "net.hycrafthd.minecraft_authenticator.test.InteractiveFileCreatorMain"
 	workingDir run
 }
@@ -85,7 +85,7 @@ task runCustomAzureApplication(type: JavaExec) {
 	if(!run.exists()) {
 		run.mkdirs()
 	}
-
+	
 	main "net.hycrafthd.minecraft_authenticator.test.CustomAzureApplicationMain"
 	workingDir run
 }
@@ -96,30 +96,30 @@ launchConfig {
 
 tasks.withType(PublishToMavenRepository) {
 	onlyIf {
-		getValue("mavenpass") != null
+		getValue("maven.password") != null
 	}
 }
 
 publishing {
 	publish.dependsOn build
-
+	
 	repositories {
 		maven {
 			url "https://repo.u-team.info"
 			credentials {
 				username = "maven"
-				password = getValue("mavenpass")
+				password = getValue("maven.password")
 			}
 		}
 	}
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
-
+			
 			groupId = project.group
 			artifactId = project.archivesBaseName
 			version = project.version
-
+			
 			pom {
 				name = project.archivesBaseName
 				description = "Minecraft-Authenticator"
@@ -129,7 +129,7 @@ publishing {
 					connection = "scm:git:git://github.com/HyCraftHD/Minecraft-Authenticator.git"
 					developerConnection = "scm:git:git@github.com:HyCraftHD/Minecraft-Authenticator.git"
 				}
-
+				
 				issueManagement {
 					system = "github"
 					url = "https://github.com/HyCraftHD/Minecraft-Authenticator/issues"
