@@ -156,4 +156,7 @@ public class ConnectionUtil {
 		return escaper.escape(object.toString());
 	}
 	
+	public static record TimeoutValues(int connectTimeout, int readTimeout) {
+	}
+	
 }

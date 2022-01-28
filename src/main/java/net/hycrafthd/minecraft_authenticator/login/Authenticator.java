@@ -14,6 +14,7 @@ import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
+import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
 
@@ -272,7 +273,7 @@ public class Authenticator {
 		 * @throws AuthenticationException Throws exception if login was not successful
 		 */
 		public Authenticator run() throws AuthenticationException {
-			return new Authenticator(fileFunction, authenticate, customAzureApplication);
+			return new Authenticator(fileFunction, authenticate, customAzureApplication, new TimeoutValues(serviceConnectTimeout, serviceReadTimeout));
 		}
 		
 	}
@@ -286,9 +287,10 @@ public class Authenticator {
 	 * @param fileFunction Function that returns {@link AuthenticationFile} for authentication
 	 * @param authenticate Should authenticate to get a {@link User} as a result
 	 * @param customAzureApplication Optional value to pass custom azure application values
+	 * @param timeoutValues Timeout values for a service connection
 	 * @throws AuthenticationException Throws exception if authentication was not successful
 	 */
-	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, Optional<Entry<String, String>> customAzureApplication) throws AuthenticationException {
+	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, Optional<Entry<String, String>> customAzureApplication, TimeoutValues timeoutValues) throws AuthenticationException {
 		final AuthenticationFile file = fileFunction.get(customAzureApplication);
 		
 		AuthenticationFile resultFile = file;
