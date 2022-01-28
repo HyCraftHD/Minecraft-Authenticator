@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
+import net.hycrafthd.minecraft_authenticator.login.file.AuthenticationFile;
+import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
+import net.hycrafthd.minecraft_authenticator.login.file.YggdrasilAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
@@ -265,9 +268,9 @@ public class Authenticator {
 		if (authenticate) {
 			final LoginResponse<? extends AuthenticationException> loginResponse;
 			
-			if (file instanceof AuthenticationFile.Microsoft) {
+			if (file instanceof MicrosoftAuthenticationFile) {
 				// Microsoft authentication
-				final AuthenticationFile.Microsoft microsoftFile = (AuthenticationFile.Microsoft) file;
+				final MicrosoftAuthenticationFile microsoftFile = (MicrosoftAuthenticationFile) file;
 				
 				final MicrosoftLoginResponse response;
 				if (customAzureApplication.isPresent()) {
@@ -280,17 +283,17 @@ public class Authenticator {
 				}
 				
 				if (response.hasRefreshToken()) {
-					resultFile = new AuthenticationFile.Microsoft(response.getRefreshToken().get());
+					resultFile = new MicrosoftAuthenticationFile(response.getRefreshToken().get());
 				}
 				
 				loginResponse = response;
-			} else if (file instanceof AuthenticationFile.Yggdrasil) {
+			} else if (file instanceof YggdrasilAuthenticationFile) {
 				// Mojang authentication
-				final AuthenticationFile.Yggdrasil yggdrasilFile = (AuthenticationFile.Yggdrasil) file;
+				final YggdrasilAuthenticationFile yggdrasilFile = (YggdrasilAuthenticationFile) file;
 				final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken());
 				
 				if (response.hasAccessAndClientToken()) {
-					resultFile = new AuthenticationFile.Yggdrasil(response.getAccessToken().get(), response.getClientToken().get());
+					resultFile = new YggdrasilAuthenticationFile(response.getAccessToken().get(), response.getClientToken().get());
 				}
 				loginResponse = response;
 			} else {
