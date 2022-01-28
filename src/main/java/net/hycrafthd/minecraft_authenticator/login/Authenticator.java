@@ -70,9 +70,8 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
  * {@link Builder#customAzureApplication(String, String)}. <br>
  * To log into a microsoft account you need the authorization code that you get after you log into your microsoft
  * account. First you need to open the {@link #microsoftLogin()} url in a browser (or in an integrated browser like
- * javafx) and let the user login. After that you will be redirected to a page where the authorization code is the
- * <big>code</big> url parameter. The url looks like this:
- * https://login.live.com/oauth20_desktop.srf?code=M.XYZTHISISMYCODE
+ * javafx) and let the user login. After that you will be redirected to a page where the authorization code is the code
+ * url parameter. The url looks like this: https://login.live.com/oauth20_desktop.srf?code=M.XYZTHISISMYCODE
  * </p>
  * 
  * <pre>
