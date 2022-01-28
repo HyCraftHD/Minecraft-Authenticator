@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2022-01-28
+### Changed
+ - Removed guava dependency (replaced url encoders with jdk ones)
+ - Updated gson dependency to 2.8.9
+
 ## [2.0.0] - 2022-01-28
 ### Added
  - Added timeout values in authentication builder
