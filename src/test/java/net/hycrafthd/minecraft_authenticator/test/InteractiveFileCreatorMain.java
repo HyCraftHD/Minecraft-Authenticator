@@ -3,13 +3,15 @@ package net.hycrafthd.minecraft_authenticator.test;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationException;
 import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
-import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
 public class InteractiveFileCreatorMain {
 	
@@ -28,9 +30,9 @@ public class InteractiveFileCreatorMain {
 					System.out.println(MicrosoftService.oAuthLoginUrl());
 					System.out.println("Paste the code parameter of the returned url");
 					final String authCode = reader.readLine();
-					try {
+					try (OutputStream outputStream = Files.newOutputStream(authFile, StandardOpenOption.CREATE)) {
 						final Authenticator authenticator = Authenticator.ofMicrosoft(authCode).run();
-						AuthenticationUtil.writeAuthenticationFile(authenticator.getResultFile(), authFile);
+						authenticator.getResultFile().write(outputStream);
 					} catch (IOException | AuthenticationException ex) {
 						throw new IllegalStateException("An error occured while trying to create auth file", ex);
 					}
@@ -44,9 +46,9 @@ public class InteractiveFileCreatorMain {
 					System.out.println("Type in your client token (This will be used for every request and keeps you logged in)");
 					final String clientToken = reader.readLine();
 					
-					try {
+					try (OutputStream outputStream = Files.newOutputStream(authFile, StandardOpenOption.CREATE)) {
 						final Authenticator authenticator = Authenticator.ofYggdrasil(clientToken, username, password).run();
-						AuthenticationUtil.writeAuthenticationFile(authenticator.getResultFile(), authFile);
+						authenticator.getResultFile().write(outputStream);
 					} catch (IOException | AuthenticationException ex) {
 						throw new IllegalStateException("An error occured while trying to create auth file", ex);
 					}
