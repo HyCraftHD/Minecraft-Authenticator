@@ -31,7 +31,6 @@ repositories {
 }
 
 dependencies {
-	implementation group: "com.google.guava", name: "guava", version: config.guava.version
 	implementation group: "com.google.code.gson", name: "gson", version: config.gson.version
 }
 

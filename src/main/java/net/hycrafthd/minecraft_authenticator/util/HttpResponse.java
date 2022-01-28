@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import com.google.common.io.ByteStreams;
-
 public class HttpResponse {
 	
 	private final int responseCode;
@@ -37,7 +35,7 @@ public class HttpResponse {
 		if (inputStream == null) {
 			bytes = new byte[0];
 		} else {
-			bytes = ByteStreams.toByteArray(inputStream);
+			bytes = inputStream.readAllBytes();
 		}
 		return new HttpResponse(responseCode, bytes);
 	}

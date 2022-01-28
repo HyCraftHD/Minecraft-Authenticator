@@ -6,15 +6,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
-
-import com.google.common.escape.Escaper;
-import com.google.common.net.UrlEscapers;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
 
@@ -31,7 +29,7 @@ public class ConnectionUtil {
 	}
 	
 	public static HttpResponse urlEncodedPostRequest(URL url, String acceptType, Map<String, Object> parameters, TimeoutValues timeoutValues) throws IOException {
-		return postRequest(url, acceptType, URL_ENCODED_CONTENT_TYPE, HttpPayload.fromString(createUrlEncodedParameters(parameters, UrlEscapers.urlFormParameterEscaper())), NO_OP, timeoutValues);
+		return postRequest(url, acceptType, URL_ENCODED_CONTENT_TYPE, HttpPayload.fromString(createUrlEncodedParameters(parameters, false)), NO_OP, timeoutValues);
 	}
 	
 	public static HttpResponse bearerAuthorizationJsonGetRequest(URL url, String token, TimeoutValues timeoutValues) throws IOException {
@@ -127,33 +125,38 @@ public class ConnectionUtil {
 			builder.append("?");
 		}
 		
-		appendUrlEncodedParameters(builder, parameters, UrlEscapers.urlFragmentEscaper());
+		appendUrlEncodedParameters(builder, parameters, true);
 		
 		return new URL(builder.toString());
 	}
 	
-	private static String createUrlEncodedParameters(Map<String, Object> parameters, Escaper escaper) {
+	private static String createUrlEncodedParameters(Map<String, Object> parameters, boolean percent20) {
 		final StringBuilder builder = new StringBuilder();
-		appendUrlEncodedParameters(builder, parameters, escaper);
+		appendUrlEncodedParameters(builder, parameters, percent20);
 		return builder.toString();
 	}
 	
-	private static StringBuilder appendUrlEncodedParameters(StringBuilder builder, Map<String, Object> parameters, Escaper escaper) {
+	private static StringBuilder appendUrlEncodedParameters(StringBuilder builder, Map<String, Object> parameters, boolean percent20) {
 		boolean needAnd = false;
 		for (final Map.Entry<String, Object> entry : parameters.entrySet()) {
 			if (needAnd) {
 				builder.append("&");
 			}
 			needAnd = true;
-			builder.append(escape(entry.getKey(), escaper));
+			builder.append(escape(entry.getKey(), percent20));
 			builder.append("=");
-			builder.append(escape(entry.getValue(), escaper));
+			builder.append(escape(entry.getValue(), percent20));
 		}
 		return builder;
 	}
 	
-	private static String escape(Object object, Escaper escaper) {
-		return escaper.escape(object.toString());
+	private static String escape(Object object, boolean percent20) {
+		final String encoded = URLEncoder.encode(object.toString(), StandardCharsets.UTF_8);
+		if (percent20) {
+			return encoded.replace("+", "%20");
+		} else {
+			return encoded;
+		}
 	}
 	
 	public static record TimeoutValues(int connectTimeout, int readTimeout) {
