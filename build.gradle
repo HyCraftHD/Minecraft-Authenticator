@@ -1,13 +1,13 @@
 buildscript {
-	
+
 	ext.buildProps = file "build.properties"
-	
+
 	buildProps.withReader {
 		def prop = new Properties()
 		prop.load(it)
 		ext.config = new ConfigSlurper().parse prop
 	}
-	
+
 	repositories {
 		mavenCentral()
 	}
@@ -37,7 +37,7 @@ dependencies {
 
 group = "net.hycrafthd"
 archivesBaseName = "minecraft_authenticator"
-version = "1.0.1"
+version = "2.0.0"
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
@@ -50,7 +50,7 @@ sourceSets {
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(8)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
 	withSourcesJar()
 	withJavadocJar()
@@ -58,9 +58,9 @@ java {
 
 tasks.named("jar") {
 	archiveClassifier = ""
-	
+
 	from "LICENSE"
-	
+
 	manifest {
 		attributes (
 				"Implementation-Version": project.version,
@@ -75,7 +75,7 @@ task runInteractiveFileCreator(type: JavaExec) {
 	if(!run.exists()) {
 		run.mkdirs()
 	}
-	
+
 	main "net.hycrafthd.minecraft_authenticator.test.InteractiveFileCreatorMain"
 	workingDir run
 }
@@ -85,7 +85,7 @@ task runCustomAzureApplication(type: JavaExec) {
 	if(!run.exists()) {
 		run.mkdirs()
 	}
-	
+
 	main "net.hycrafthd.minecraft_authenticator.test.CustomAzureApplicationMain"
 	workingDir run
 }
@@ -102,7 +102,7 @@ tasks.withType(PublishToMavenRepository) {
 
 publishing {
 	publish.dependsOn build
-	
+
 	repositories {
 		maven {
 			url "https://repo.u-team.info"
@@ -115,11 +115,11 @@ publishing {
 	publications {
 		mavenJava(MavenPublication) {
 			from components.java
-			
+
 			groupId = project.group
 			artifactId = project.archivesBaseName
 			version = project.version
-			
+
 			pom {
 				name = project.archivesBaseName
 				description = "Minecraft-Authenticator"
@@ -129,7 +129,7 @@ publishing {
 					connection = "scm:git:git://github.com/HyCraftHD/Minecraft-Authenticator.git"
 					developerConnection = "scm:git:git@github.com:HyCraftHD/Minecraft-Authenticator.git"
 				}
-				
+
 				issueManagement {
 					system = "github"
 					url = "https://github.com/HyCraftHD/Minecraft-Authenticator/issues"
