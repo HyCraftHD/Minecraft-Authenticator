@@ -117,7 +117,7 @@ public class Authenticator {
 	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder of(AuthenticationFile file) {
-		return new Builder(() -> file);
+		return new Builder(timeoutValues -> file);
 	}
 	
 	/**
@@ -128,7 +128,7 @@ public class Authenticator {
 	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder ofMicrosoft(String authorizationCode) {
-		return new Builder(customAzureApplication -> AuthenticationUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode));
+		return new Builder((customAzureApplication, timeoutValues) -> AuthenticationUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode, timeoutValues));
 	}
 	
 	/**
@@ -142,7 +142,7 @@ public class Authenticator {
 	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder ofYggdrasil(String clientToken, String username, String password) {
-		return new Builder(() -> AuthenticationUtil.createYggdrasilAuthenticationFile(clientToken, username, password));
+		return new Builder(timeoutValues -> AuthenticationUtil.createYggdrasilAuthenticationFile(clientToken, username, password, timeoutValues));
 	}
 	
 	/**
@@ -194,13 +194,13 @@ public class Authenticator {
 		private int serviceReadTimeout;
 		
 		/**
-		 * Accepts a {@link AuthenticationFileSupplier} which is just a normal supplier for an {@link AuthenticationFile} which
+		 * Accepts a {@link AuthenticationFileFunction} which is just a normal supplier for an {@link AuthenticationFile} which
 		 * can throw an {@link AuthenticationException}
 		 * 
 		 * @param fileSupplier Supplier that returns {@link AuthenticationFile} for authentication
 		 */
-		protected Builder(AuthenticationFileSupplier fileSupplier) {
-			this(customAzureApplication -> fileSupplier.get());
+		protected Builder(AuthenticationFileFunction fileSupplier) {
+			this((customAzureApplication, timeoutValues) -> fileSupplier.get(timeoutValues));
 		}
 		
 		/**
@@ -291,7 +291,7 @@ public class Authenticator {
 	 * @throws AuthenticationException Throws exception if authentication was not successful
 	 */
 	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, Optional<Entry<String, String>> customAzureApplication, TimeoutValues timeoutValues) throws AuthenticationException {
-		final AuthenticationFile file = fileFunction.get(customAzureApplication);
+		final AuthenticationFile file = fileFunction.get(customAzureApplication, timeoutValues);
 		
 		AuthenticationFile resultFile = file;
 		Optional<User> user = Optional.empty();
@@ -309,9 +309,9 @@ public class Authenticator {
 					final Entry<String, String> entry = customAzureApplication.get();
 					final String clientId = entry.getKey();
 					final String redirectUrl = entry.getValue();
-					response = MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, microsoftFile.getRefreshToken());
+					response = MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, microsoftFile.getRefreshToken(), timeoutValues);
 				} else {
-					response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken());
+					response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken(), timeoutValues);
 				}
 				
 				if (response.hasRefreshToken()) {
@@ -322,7 +322,7 @@ public class Authenticator {
 			} else if (file instanceof YggdrasilAuthenticationFile) {
 				// Mojang authentication
 				final YggdrasilAuthenticationFile yggdrasilFile = (YggdrasilAuthenticationFile) file;
-				final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken());
+				final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken(), timeoutValues);
 				
 				if (response.hasAccessAndClientToken()) {
 					resultFile = new YggdrasilAuthenticationFile(response.getAccessToken().get(), response.getClientToken().get());
@@ -368,15 +368,16 @@ public class Authenticator {
 	 * Supplier that returns an {@link AuthenticationFile} and can trow an {@link AuthenticationException}
 	 */
 	@FunctionalInterface
-	protected interface AuthenticationFileSupplier {
+	protected interface AuthenticationFileFunction {
 		
 		/**
 		 * Returns the {@link AuthenticationFile}
 		 * 
+		 * @param timeoutValues Timeout values for a service connection
 		 * @return {@link AuthenticationFile}
 		 * @throws AuthenticationException Throws if authentication file is created with an online service with authentication
 		 */
-		AuthenticationFile get() throws AuthenticationException;
+		AuthenticationFile get(TimeoutValues timeoutValues) throws AuthenticationException;
 	}
 	
 	/**
@@ -391,10 +392,11 @@ public class Authenticator {
 		 * 
 		 * @param customAzureApplication Custom azure application values that is needed to handle the oauth for microsoft
 		 *        accounts
+		 * @param timeoutValues Timeout values for a service connection
 		 * @return {@link AuthenticationFile}
 		 * @throws AuthenticationException Throws if authentication file is created with an online service with authentication
 		 */
-		AuthenticationFile get(Optional<Entry<String, String>> customAzureApplication) throws AuthenticationException;
+		AuthenticationFile get(Optional<Entry<String, String>> customAzureApplication, TimeoutValues timeoutValues) throws AuthenticationException;
 	}
 	
 }

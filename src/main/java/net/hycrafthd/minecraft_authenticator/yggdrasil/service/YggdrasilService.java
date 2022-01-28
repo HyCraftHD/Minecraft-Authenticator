@@ -10,6 +10,7 @@ import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil;
 import net.hycrafthd.minecraft_authenticator.util.HttpPayload;
 import net.hycrafthd.minecraft_authenticator.util.HttpResponse;
+import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ErrorResponse;
@@ -19,16 +20,16 @@ import net.hycrafthd.minecraft_authenticator.yggdrasil.api.ValidatePayload;
 
 public class YggdrasilService {
 	
-	private static HttpResponse serviceRequest(String endpoint, String payload) throws IOException {
-		return ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.YGGDRASIL_SERVICE, endpoint), HttpPayload.fromString(payload));
+	private static HttpResponse serviceRequest(String endpoint, String payload, TimeoutValues timeoutValues) throws IOException {
+		return ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.YGGDRASIL_SERVICE, endpoint), HttpPayload.fromString(payload), timeoutValues);
 	}
 	
-	private static <T> YggdrasilResponse<T> responseServiceRequest(String endpoint, Object payload, Class<T> responseClass) {
+	private static <T> YggdrasilResponse<T> responseServiceRequest(String endpoint, Object payload, Class<T> responseClass, TimeoutValues timeoutValues) {
 		final String payloadString = Constants.GSON.toJson(payload);
 		
 		final String responseString;
 		try {
-			responseString = serviceRequest(endpoint, payloadString).getAsString();
+			responseString = serviceRequest(endpoint, payloadString, timeoutValues).getAsString();
 		} catch (IOException ex) {
 			return YggdrasilResponse.ofException(ex);
 		}
@@ -51,20 +52,20 @@ public class YggdrasilService {
 		}
 	}
 	
-	public static YggdrasilResponse<AuthenticateResponse> authenticate(AuthenticatePayload payload) {
-		return responseServiceRequest(Constants.YGGDRASIL_ENDPOINT_AUTHENTICATE, payload, AuthenticateResponse.class);
+	public static YggdrasilResponse<AuthenticateResponse> authenticate(AuthenticatePayload payload, TimeoutValues timeoutValues) {
+		return responseServiceRequest(Constants.YGGDRASIL_ENDPOINT_AUTHENTICATE, payload, AuthenticateResponse.class, timeoutValues);
 	}
 	
-	public static YggdrasilResponse<RefreshResponse> refresh(RefreshPayload payload) {
-		return responseServiceRequest(Constants.YGGDRASIL_ENDPOINT_REFRESH, payload, RefreshResponse.class);
+	public static YggdrasilResponse<RefreshResponse> refresh(RefreshPayload payload, TimeoutValues timeoutValues) {
+		return responseServiceRequest(Constants.YGGDRASIL_ENDPOINT_REFRESH, payload, RefreshResponse.class, timeoutValues);
 	}
 	
-	public static YggdrasilResponse<Boolean> validate(ValidatePayload payload) {
+	public static YggdrasilResponse<Boolean> validate(ValidatePayload payload, TimeoutValues timeoutValues) {
 		final String payloadString = Constants.GSON.toJson(payload);
 		
 		final String responseString;
 		try {
-			final HttpResponse response = serviceRequest(Constants.YGGDRASIL_ENDPOINT_VALIDATE, payloadString);
+			final HttpResponse response = serviceRequest(Constants.YGGDRASIL_ENDPOINT_VALIDATE, payloadString, timeoutValues);
 			responseString = response.getAsString();
 			if (response.getResponseCode() == 204) {
 				return YggdrasilResponse.ofResponse(true);

@@ -24,13 +24,14 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil;
 import net.hycrafthd.minecraft_authenticator.util.HttpPayload;
 import net.hycrafthd.minecraft_authenticator.util.HttpResponse;
 import net.hycrafthd.minecraft_authenticator.util.Parameters;
+import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 
 public class MicrosoftService {
 	
-	private static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponseServiceRequest(Parameters parameters) {
+	private static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponseServiceRequest(Parameters parameters, TimeoutValues timeoutValues) {
 		final String responseString;
 		try {
-			responseString = ConnectionUtil.urlEncodedPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), ConnectionUtil.JSON_CONTENT_TYPE, parameters).getAsString();
+			responseString = ConnectionUtil.urlEncodedPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), ConnectionUtil.JSON_CONTENT_TYPE, parameters, timeoutValues).getAsString();
 		} catch (IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
@@ -71,39 +72,39 @@ public class MicrosoftService {
 		}
 	}
 	
-	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String authorizationCode) {
-		return oAuthTokenFromCode(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, authorizationCode);
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String authorizationCode, TimeoutValues timeoutValues) {
+		return oAuthTokenFromCode(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, authorizationCode, timeoutValues);
 	}
 	
-	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String clientId, String redirectUrl, String authorizationCode) {
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String clientId, String redirectUrl, String authorizationCode, TimeoutValues timeoutValues) {
 		final Parameters parameters = Parameters.create() //
 				.add("client_id", clientId) //
 				.add("code", authorizationCode) //
 				.add("grant_type", "authorization_code") //
 				.add("redirect_uri", redirectUrl);
 		
-		return oAuthResponseServiceRequest(parameters);
+		return oAuthResponseServiceRequest(parameters, timeoutValues);
 	}
 	
-	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String refreshToken) {
-		return oAuthTokenFromRefreshToken(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, refreshToken);
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String refreshToken, TimeoutValues timeoutValues) {
+		return oAuthTokenFromRefreshToken(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, refreshToken, timeoutValues);
 	}
 	
-	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String clientId, String redirectUrl, String refreshToken) {
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String clientId, String redirectUrl, String refreshToken, TimeoutValues timeoutValues) {
 		final Parameters parameters = Parameters.create() //
 				.add("client_id", clientId) //
 				.add("refresh_token", refreshToken) //
 				.add("grant_type", "refresh_token") //
 				.add("redirect_uri", redirectUrl);
 		
-		return oAuthResponseServiceRequest(parameters);
+		return oAuthResponseServiceRequest(parameters, timeoutValues);
 		
 	}
 	
-	public static MicrosoftResponse<XBLAuthenticateResponse, Integer> xblAuthenticate(XBLAuthenticatePayload payload) {
+	public static MicrosoftResponse<XBLAuthenticateResponse, Integer> xblAuthenticate(XBLAuthenticatePayload payload, TimeoutValues timeoutValues) {
 		final String responseString;
 		try {
-			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)));
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)), timeoutValues);
 			responseString = response.getAsString();
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
@@ -115,10 +116,10 @@ public class MicrosoftService {
 		return MicrosoftResponse.ofResponse(response);
 	}
 	
-	public static MicrosoftResponse<XSTSAuthorizeResponse, XSTSAuthorizeErrorResponse> xstsAuthorize(XSTSAuthorizePayload payload) {
+	public static MicrosoftResponse<XSTSAuthorizeResponse, XSTSAuthorizeErrorResponse> xstsAuthorize(XSTSAuthorizePayload payload, TimeoutValues timeoutValues) {
 		final String responseString;
 		try {
-			responseString = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload))).getAsString();
+			responseString = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)), timeoutValues).getAsString();
 		} catch (IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
@@ -133,10 +134,10 @@ public class MicrosoftService {
 		return MicrosoftResponse.ofResponse(response);
 	}
 	
-	public static MicrosoftResponse<MinecraftLoginWithXBoxResponse, Integer> minecraftLoginWithXsts(MinecraftLoginWithXBoxPayload payload) {
+	public static MicrosoftResponse<MinecraftLoginWithXBoxResponse, Integer> minecraftLoginWithXsts(MinecraftLoginWithXBoxPayload payload, TimeoutValues timeoutValues) {
 		final String responseString;
 		try {
-			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromGson(payload));
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromGson(payload), timeoutValues);
 			responseString = response.getAsString();
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
@@ -149,10 +150,10 @@ public class MicrosoftService {
 		return MicrosoftResponse.ofResponse(response);
 	}
 	
-	public static MicrosoftResponse<MinecraftHasPurchasedResponse, Integer> minecraftHasPurchased(String accessToken) {
+	public static MicrosoftResponse<MinecraftHasPurchasedResponse, Integer> minecraftHasPurchased(String accessToken, TimeoutValues timeoutValues) {
 		final String responseString;
 		try {
-			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED), accessToken);
+			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED), accessToken, timeoutValues);
 			responseString = response.getAsString();
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
@@ -165,10 +166,10 @@ public class MicrosoftService {
 		return MicrosoftResponse.ofResponse(response);
 	}
 	
-	public static MicrosoftResponse<MinecraftProfileResponse, Integer> minecraftProfile(String accessToken) {
+	public static MicrosoftResponse<MinecraftProfileResponse, Integer> minecraftProfile(String accessToken, TimeoutValues timeoutValues) {
 		final String responseString;
 		try {
-			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_PROFILE), accessToken);
+			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_PROFILE), accessToken, timeoutValues);
 			responseString = response.getAsString();
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());

@@ -26,21 +26,21 @@ public class ConnectionUtil {
 	private static final ConsumerWithIOException<HttpURLConnection> NO_OP = urlConnection -> {
 	};
 	
-	public static HttpResponse jsonPostRequest(URL url, HttpPayload payload) throws IOException {
-		return postRequest(url, JSON_CONTENT_TYPE, JSON_CONTENT_TYPE, payload, NO_OP);
+	public static HttpResponse jsonPostRequest(URL url, HttpPayload payload, TimeoutValues timeoutValues) throws IOException {
+		return postRequest(url, JSON_CONTENT_TYPE, JSON_CONTENT_TYPE, payload, NO_OP, timeoutValues);
 	}
 	
-	public static HttpResponse urlEncodedPostRequest(URL url, String acceptType, Map<String, Object> parameters) throws IOException {
-		return postRequest(url, acceptType, URL_ENCODED_CONTENT_TYPE, HttpPayload.fromString(createUrlEncodedParameters(parameters, UrlEscapers.urlFormParameterEscaper())), NO_OP);
+	public static HttpResponse urlEncodedPostRequest(URL url, String acceptType, Map<String, Object> parameters, TimeoutValues timeoutValues) throws IOException {
+		return postRequest(url, acceptType, URL_ENCODED_CONTENT_TYPE, HttpPayload.fromString(createUrlEncodedParameters(parameters, UrlEscapers.urlFormParameterEscaper())), NO_OP, timeoutValues);
 	}
 	
-	public static HttpResponse bearerAuthorizationJsonGetRequest(URL url, String token) throws IOException {
+	public static HttpResponse bearerAuthorizationJsonGetRequest(URL url, String token, TimeoutValues timeoutValues) throws IOException {
 		return getRequest(url, JSON_CONTENT_TYPE, urlConnection -> {
 			urlConnection.setRequestProperty("Authorization", "Bearer " + token);
-		});
+		}, timeoutValues);
 	}
 	
-	public static HttpResponse postRequest(URL url, String acceptType, String contentType, HttpPayload payload, ConsumerWithIOException<HttpURLConnection> preConnect) throws IOException {
+	public static HttpResponse postRequest(URL url, String acceptType, String contentType, HttpPayload payload, ConsumerWithIOException<HttpURLConnection> preConnect, TimeoutValues timeoutValues) throws IOException {
 		return basicRequest(url, "POST", acceptType, urlConnection -> {
 			urlConnection.setDoOutput(true);
 			urlConnection.setRequestProperty("Charset", StandardCharsets.UTF_8.name());
@@ -53,17 +53,17 @@ public class ConnectionUtil {
 					payload.write(outputStream);
 				}
 			}
-		});
+		}, timeoutValues);
 	}
 	
-	public static HttpResponse getRequest(URL url, String acceptType, ConsumerWithIOException<HttpURLConnection> preConnect) throws IOException {
-		return basicRequest(url, "GET", acceptType, preConnect, NO_OP);
+	public static HttpResponse getRequest(URL url, String acceptType, ConsumerWithIOException<HttpURLConnection> preConnect, TimeoutValues timeoutValues) throws IOException {
+		return basicRequest(url, "GET", acceptType, preConnect, NO_OP, timeoutValues);
 	}
 	
-	public static HttpResponse basicRequest(URL url, String method, String acceptType, ConsumerWithIOException<HttpURLConnection> preConnect, ConsumerWithIOException<HttpURLConnection> postConnect) throws IOException {
+	public static HttpResponse basicRequest(URL url, String method, String acceptType, ConsumerWithIOException<HttpURLConnection> preConnect, ConsumerWithIOException<HttpURLConnection> postConnect, TimeoutValues timeoutValues) throws IOException {
 		final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-		urlConnection.setConnectTimeout(15000);
-		urlConnection.setReadTimeout(15000);
+		urlConnection.setConnectTimeout(timeoutValues.connectTimeout());
+		urlConnection.setReadTimeout(timeoutValues.readTimeout());
 		urlConnection.setUseCaches(false);
 		urlConnection.setInstanceFollowRedirects(true);
 		urlConnection.setDoInput(true);
