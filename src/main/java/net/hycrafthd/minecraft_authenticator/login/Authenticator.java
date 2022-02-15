@@ -15,13 +15,10 @@ import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginResponse;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilLoginRoutine;
 
 /**
  * <p>
- * Main class to authenticate a user with minecraft services. Currently mojang and microsoft accounts are supported.
- * <br>
+ * Main class to authenticate a user with minecraft services. Currently microsoft accounts are supported. <br>
  * First some information about yggdrasil and microsoft accounts:
  * </p>
  * <p>
@@ -131,20 +128,6 @@ public class Authenticator {
 	 */
 	public static Builder ofMicrosoft(String authorizationCode) {
 		return new Builder((customAzureApplication, timeoutValues) -> AuthenticationUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode, timeoutValues));
-	}
-	
-	/**
-	 * Creates a mojang {@link Authenticator} with a clientToken and the login credentials. See examples in the class
-	 * javadoc.
-	 * 
-	 * @see Authenticator
-	 * @param clientToken The client token. Should be the same for all request for one account after the first login
-	 * @param username The mojang username or email
-	 * @param password The mojang password
-	 * @return A {@link Builder} to configure the authenticator
-	 */
-	public static Builder ofYggdrasil(String clientToken, String username, String password) {
-		return new Builder(timeoutValues -> AuthenticationUtil.createYggdrasilAuthenticationFile(clientToken, username, password, timeoutValues));
 	}
 	
 	/**
@@ -322,14 +305,7 @@ public class Authenticator {
 				
 				loginResponse = response;
 			} else if (file instanceof YggdrasilAuthenticationFile) {
-				// Mojang authentication
-				final YggdrasilAuthenticationFile yggdrasilFile = (YggdrasilAuthenticationFile) file;
-				final YggdrasilLoginResponse response = YggdrasilLoginRoutine.loginWithAccessToken(yggdrasilFile.getAccessToken(), yggdrasilFile.getClientToken(), timeoutValues);
-				
-				if (response.hasAccessAndClientToken()) {
-					resultFile = new YggdrasilAuthenticationFile(response.getAccessToken().get(), response.getClientToken().get());
-				}
-				loginResponse = response;
+				throw new AuthenticationException("Yggdrasil is outdated and does not work anymore");
 			} else {
 				throw new AuthenticationException(file + " is not a microsoft or a yggdrasil file");
 			}

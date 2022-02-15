@@ -38,22 +38,6 @@ public class InteractiveFileCreatorMain {
 					}
 					System.out.println("Successfully created microsoft auth file");
 					return;
-				} else if (type.equals("mojang")) {
-					System.out.println("Type in your username / email");
-					final String username = reader.readLine();
-					System.out.println("Type in your password");
-					final String password = reader.readLine();
-					System.out.println("Type in your client token (This will be used for every request and keeps you logged in)");
-					final String clientToken = reader.readLine();
-					
-					try (OutputStream outputStream = Files.newOutputStream(authFile, StandardOpenOption.CREATE)) {
-						final Authenticator authenticator = Authenticator.ofYggdrasil(clientToken, username, password).run();
-						authenticator.getResultFile().write(outputStream);
-					} catch (IOException | AuthenticationException ex) {
-						throw new IllegalStateException("An error occured while trying to create auth file", ex);
-					}
-					System.out.println("Successfully created mojang auth file");
-					return;
 				}
 			} while (true);
 		}

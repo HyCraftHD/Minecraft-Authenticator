@@ -13,19 +13,12 @@ import com.google.gson.JsonParseException;
 import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.login.file.AuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
-import net.hycrafthd.minecraft_authenticator.login.file.YggdrasilAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationException;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.YggdrasilAuthenticationException;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticatePayload.Agent;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.api.AuthenticateResponse;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.service.YggdrasilResponse;
-import net.hycrafthd.minecraft_authenticator.yggdrasil.service.YggdrasilService;
 
 public class AuthenticationUtil {
 	
@@ -65,16 +58,5 @@ public class AuthenticationUtil {
 		}
 		final OAuthTokenResponse response = microsoftResponse.getResponse().get();
 		return new MicrosoftAuthenticationFile(response.getRefreshToken());
-	}
-	
-	public static YggdrasilAuthenticationFile createYggdrasilAuthenticationFile(String clientToken, String username, String password, TimeoutValues timeoutValues) throws YggdrasilAuthenticationException {
-		final YggdrasilResponse<AuthenticateResponse> yggdrasilResponse = YggdrasilService.authenticate(new AuthenticatePayload(new Agent("Minecraft", 1), username, password, clientToken, true), timeoutValues);
-		if (yggdrasilResponse.hasException()) {
-			throw new YggdrasilAuthenticationException("Cannot authenticate minecraft account", yggdrasilResponse.getException().get());
-		} else if (yggdrasilResponse.hasErrorResponse()) {
-			throw new YggdrasilAuthenticationException("Cannot authenticate minecraft account because: " + yggdrasilResponse.getErrorResponse().get());
-		}
-		final AuthenticateResponse response = yggdrasilResponse.getResponse().get();
-		return new YggdrasilAuthenticationFile(response.getAccessToken(), response.getClientToken());
 	}
 }
