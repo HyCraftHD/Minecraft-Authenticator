@@ -11,7 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
-import net.hycrafthd.minecraft_authenticator.login.file.AuthenticationFile;
+import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationException;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
@@ -35,7 +35,7 @@ public class AuthenticationUtil {
 		try {
 			final String json = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 			return Constants.GSON.fromJson(json, AuthenticationFile.class);
-		} catch (JsonParseException ex) {
+		} catch (JsonParseException | IllegalStateException | ClassCastException ex) {
 			throw new IOException("Cannot parse authentication file", ex);
 		}
 	}

@@ -1,4 +1,4 @@
-package net.hycrafthd.minecraft_authenticator.login.file;
+package net.hycrafthd.minecraft_authenticator.login;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,20 +7,18 @@ import java.io.OutputStream;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.JsonAdapter;
-import com.google.gson.annotations.SerializedName;
 
-import net.hycrafthd.minecraft_authenticator.login.file.AuthenticationFile.AuthenticationFileDeserializer;
+import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile.AuthenticationFileDeserializer;
+import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
 /**
- * File that contains authentication information. This is currently either a {@link YggdrasilAuthenticationFile} or a
- * {@link MicrosoftAuthenticationFile} instance.
+ * File that contains authentication information.
  */
 @JsonAdapter(AuthenticationFileDeserializer.class)
-public sealed abstract class AuthenticationFile permits YggdrasilAuthenticationFile,MicrosoftAuthenticationFile {
+public abstract class AuthenticationFile {
 	
 	/**
 	 * Reads an {@link AuthenticationFile} from an input stream.
@@ -31,12 +29,6 @@ public sealed abstract class AuthenticationFile permits YggdrasilAuthenticationF
 	 */
 	public static AuthenticationFile read(InputStream inputStream) throws IOException {
 		return AuthenticationUtil.readAuthenticationFile(inputStream);
-	}
-	
-	private final Type type;
-	
-	protected AuthenticationFile(Type type) {
-		this.type = type;
 	}
 	
 	/**
@@ -54,30 +46,18 @@ public sealed abstract class AuthenticationFile permits YggdrasilAuthenticationF
 		AuthenticationUtil.writeAuthenticationFile(this, outputStream);
 	}
 	
-	@Override
-	public String toString() {
-		return "AuthenticationFile [type=" + type + "]";
-	}
+	/**
+	 * The refresh token for microsoft oAuth
+	 * 
+	 * @return Refresh token
+	 */
+	public abstract String getRefreshToken();
 	
-	public static enum Type {
-		@SerializedName("yggdrasil")
-		YGGDRASIL,
-		@SerializedName("microsoft")
-		MICROSOFT;
-	}
-	
-	public class AuthenticationFileDeserializer implements JsonDeserializer<AuthenticationFile> {
+	public static class AuthenticationFileDeserializer implements JsonDeserializer<AuthenticationFile> {
 		
 		@Override
 		public AuthenticationFile deserialize(JsonElement json, java.lang.reflect.Type typeOf, JsonDeserializationContext context) throws JsonParseException {
-			final JsonObject object = json.getAsJsonObject();
-			final Type type = context.deserialize(object.get("type"), Type.class);
-			if (type == Type.YGGDRASIL) {
-				return new YggdrasilAuthenticationFile(object.get("accessToken").getAsString(), object.get("clientToken").getAsString());
-			} else if (type == Type.MICROSOFT) {
-				return new MicrosoftAuthenticationFile(object.get("refreshToken").getAsString());
-			}
-			throw new JsonParseException("Type must be 'yggdrasil' or 'microsoft'");
+			return new MicrosoftAuthenticationFile(json.getAsJsonObject().get("refreshToken").getAsString());
 		}
 	}
 }

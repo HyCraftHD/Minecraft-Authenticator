@@ -7,9 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
-import net.hycrafthd.minecraft_authenticator.login.file.AuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
-import net.hycrafthd.minecraft_authenticator.login.file.YggdrasilAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
@@ -285,9 +283,8 @@ public class Authenticator {
 		if (authenticate) {
 			final LoginResponse<? extends AuthenticationException> loginResponse;
 			
-			if (file instanceof MicrosoftAuthenticationFile) {
+			if (file instanceof MicrosoftAuthenticationFile microsoftFile) {
 				// Microsoft authentication
-				final MicrosoftAuthenticationFile microsoftFile = (MicrosoftAuthenticationFile) file;
 				
 				final MicrosoftLoginResponse response;
 				if (customAzureApplication.isPresent()) {
@@ -304,10 +301,8 @@ public class Authenticator {
 				}
 				
 				loginResponse = response;
-			} else if (file instanceof YggdrasilAuthenticationFile) {
-				throw new AuthenticationException("Yggdrasil is outdated and does not work anymore");
 			} else {
-				throw new AuthenticationException(file + " is not a microsoft or a yggdrasil file");
+				throw new AuthenticationException(file + " is not a microsoft authentication file");
 			}
 			
 			// Validate authentication response
