@@ -12,7 +12,7 @@ public class User {
 	
 	/**
 	 * Creates a new minecraft user
-	 * 
+	 *
 	 * @param uuid Player uuid
 	 * @param name Player name
 	 * @param accessToken Minecraft access token
@@ -27,7 +27,7 @@ public class User {
 	
 	/**
 	 * Players uuid
-	 * 
+	 *
 	 * @return uuid
 	 */
 	public String getUuid() {
@@ -36,7 +36,7 @@ public class User {
 	
 	/**
 	 * Players name
-	 * 
+	 *
 	 * @return name
 	 */
 	public String getName() {
@@ -45,7 +45,7 @@ public class User {
 	
 	/**
 	 * Accounts access token
-	 * 
+	 *
 	 * @return access token
 	 */
 	public String getAccessToken() {
@@ -54,7 +54,7 @@ public class User {
 	
 	/**
 	 * Account type (mojang or msa)
-	 * 
+	 *
 	 * @return account type
 	 */
 	public String getType() {

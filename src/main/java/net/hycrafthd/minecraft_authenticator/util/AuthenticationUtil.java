@@ -35,7 +35,7 @@ public class AuthenticationUtil {
 		try {
 			final String json = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 			return Constants.GSON.fromJson(json, AuthenticationFile.class);
-		} catch (JsonParseException | IllegalStateException | ClassCastException ex) {
+		} catch (final JsonParseException | IllegalStateException | ClassCastException ex) {
 			throw new IOException("Cannot parse authentication file", ex);
 		}
 	}

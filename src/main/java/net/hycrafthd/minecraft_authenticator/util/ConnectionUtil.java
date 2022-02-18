@@ -79,7 +79,7 @@ public class ConnectionUtil {
 		
 		try (final InputStream inputStream = getInputStream(urlConnection, HttpURLConnection::getInputStream)) {
 			return HttpResponse.fromStream(urlConnection.getResponseCode(), inputStream);
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			try (final InputStream inputStream = getInputStream(urlConnection, HttpURLConnection::getErrorStream)) {
 				return HttpResponse.fromStream(urlConnection.getResponseCode(), inputStream);
 			}

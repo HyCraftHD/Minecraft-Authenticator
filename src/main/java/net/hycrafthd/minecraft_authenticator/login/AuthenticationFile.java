@@ -22,7 +22,7 @@ public abstract class AuthenticationFile {
 	
 	/**
 	 * Reads an {@link AuthenticationFile} from an input stream.
-	 * 
+	 *
 	 * @param inputStream InputStream to read the data from
 	 * @return An {@link AuthenticationFile} instance
 	 * @throws IOException Error if data could not be parsed
@@ -38,7 +38,7 @@ public abstract class AuthenticationFile {
 	 * writing to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your
 	 * minecraft session that should be kept private!
 	 * </p>
-	 * 
+	 *
 	 * @param outputStream Output stream to write the {@link AuthenticationFile} to
 	 * @throws IOException Errors if output stream is not writable
 	 */
@@ -48,7 +48,7 @@ public abstract class AuthenticationFile {
 	
 	/**
 	 * The refresh token for microsoft oAuth
-	 * 
+	 *
 	 * @return Refresh token
 	 */
 	public abstract String getRefreshToken();

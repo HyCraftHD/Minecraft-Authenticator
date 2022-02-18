@@ -21,10 +21,10 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeErrorRes
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeResponse;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil;
+import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 import net.hycrafthd.minecraft_authenticator.util.HttpPayload;
 import net.hycrafthd.minecraft_authenticator.util.HttpResponse;
 import net.hycrafthd.minecraft_authenticator.util.Parameters;
-import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 
 public class MicrosoftService {
 	
@@ -32,7 +32,7 @@ public class MicrosoftService {
 		final String responseString;
 		try {
 			responseString = ConnectionUtil.urlEncodedPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN), ConnectionUtil.JSON_CONTENT_TYPE, parameters, timeoutValues).getAsString();
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -67,7 +67,7 @@ public class MicrosoftService {
 		
 		try {
 			return ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_AUTHORIZE, parameters);
-		} catch (MalformedURLException ex) {
+		} catch (final MalformedURLException ex) {
 			throw new AssertionError("This url should never be malformed.");
 		}
 	}
@@ -109,7 +109,7 @@ public class MicrosoftService {
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		final XBLAuthenticateResponse response = Constants.GSON.fromJson(responseString, XBLAuthenticateResponse.class);
@@ -120,7 +120,7 @@ public class MicrosoftService {
 		final String responseString;
 		try {
 			responseString = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)), timeoutValues).getAsString();
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -142,7 +142,7 @@ public class MicrosoftService {
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -158,7 +158,7 @@ public class MicrosoftService {
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -174,7 +174,7 @@ public class MicrosoftService {
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
-		} catch (IOException ex) {
+		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
