@@ -1,13 +1,11 @@
 package net.hycrafthd.minecraft_authenticator.microsoft;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import net.hycrafthd.minecraft_authenticator.login.User;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxPayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
@@ -44,7 +42,7 @@ public class MicrosoftLoginRoutine {
 			return MicrosoftLoginResponse.ofError(new MicrosoftAuthenticationException("Cannot authenticate with xbl because the service returned http code " + xblResponse.getErrorResponse().get()), oAuthResponse.getResponse().map(OAuthTokenResponse::getRefreshToken));
 		}
 		
-		final var xstsResponse = MicrosoftService.xstsAuthorize(new XSTSAuthorizePayload(new XSTSAuthorizePayload.Properties("RETAIL", Arrays.asList(xblResponse.getResponse().get().getToken())), "rp://api.minecraftservices.com/", "JWT"), timeoutValues);
+		final var xstsResponse = MicrosoftService.xstsAuthorize(xblResponse.getResponse().get().getToken(), "rp://api.minecraftservices.com/", xblResponse.getResponse().get().getDisplayClaims(), timeoutValues);
 		if (xstsResponse.hasException()) {
 			return MicrosoftLoginResponse.ofError(new MicrosoftAuthenticationException("Cannot authorize with xsts", xstsResponse.getException().get()), oAuthResponse.getResponse().map(OAuthTokenResponse::getRefreshToken));
 		} else if (xstsResponse.hasErrorResponse()) {

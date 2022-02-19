@@ -3,6 +3,7 @@ package net.hycrafthd.minecraft_authenticator.microsoft.service;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,6 +18,7 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticateResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XBoxResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeResponse;
@@ -112,31 +114,51 @@ public class MicrosoftService {
 		}
 		
 		try {
-			return MicrosoftResponse.ofResponse(Constants.GSON.fromJson(responseElement, XBLAuthenticateResponse.class));
+			final XBLAuthenticateResponse response = Constants.GSON.fromJson(responseElement, XBLAuthenticateResponse.class);
+			
+			// Validate response
+			if (response.getDisplayClaims().getXui().isEmpty()) {
+				throw new IllegalStateException("Xui (user hashes) cannot be missing");
+			}
+			
+			return MicrosoftResponse.ofResponse(response);
 		} catch (final Exception ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 	}
 	
-	public static MicrosoftResponse<XSTSAuthorizeResponse, XSTSAuthorizeErrorResponse> xstsAuthorize(XSTSAuthorizePayload payload, TimeoutValues timeoutValues) {
-		final String responseString;
+	public static MicrosoftResponse<XSTSAuthorizeResponse, XSTSAuthorizeErrorResponse> xstsAuthorize(String xblToken, String relyingParty, XBoxResponse.DisplayClaims displayClaims, TimeoutValues timeoutValues) {
+		final XSTSAuthorizePayload payload = new XSTSAuthorizePayload(new XSTSAuthorizePayload.Properties("RETAIL", Arrays.asList(xblToken)), relyingParty, "JWT");
+		
+		final JsonElement responseElement;
 		try {
-			responseString = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)), timeoutValues).getAsString();
+			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL);
+			final String responseString = ConnectionUtil.jsonPostRequest(url, HttpPayload.fromGson(payload), timeoutValues).getAsString();
+			responseElement = JsonParser.parseString(responseString);
 		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
-		final JsonElement element = JsonParser.parseString(responseString);
-		
-		System.out.println(element);
-		
-		if (element.isJsonObject() && element.getAsJsonObject().get("XErr") != null) {
-			final XSTSAuthorizeErrorResponse response = Constants.GSON.fromJson(responseString, XSTSAuthorizeErrorResponse.class);
-			return MicrosoftResponse.ofError(response);
+		try {
+			final JsonObject responseObject = responseElement.getAsJsonObject();
+			if (responseObject.has("XErr")) {
+				return MicrosoftResponse.ofError(Constants.GSON.fromJson(responseObject, XSTSAuthorizeErrorResponse.class));
+			}
+			
+			final XSTSAuthorizeResponse response = Constants.GSON.fromJson(responseObject, XSTSAuthorizeResponse.class);
+			
+			// Validate response
+			final var xblXui = displayClaims.getXui();
+			final var xstsXui = response.getDisplayClaims().getXui();
+			
+			if (xblXui.containsAll(xstsXui)) {
+				throw new IllegalStateException("Xui (user hashes) do match match");
+			}
+			
+			return MicrosoftResponse.ofResponse(response);
+		} catch (final Exception ex) {
+			return MicrosoftResponse.ofException(ex);
 		}
-		
-		final XSTSAuthorizeResponse response = Constants.GSON.fromJson(responseString, XSTSAuthorizeResponse.class);
-		return MicrosoftResponse.ofResponse(response);
 	}
 	
 	public static MicrosoftResponse<MinecraftLoginWithXBoxResponse, Integer> minecraftLoginWithXsts(MinecraftLoginWithXBoxPayload payload, TimeoutValues timeoutValues) {
