@@ -12,10 +12,10 @@ public class Constants {
 	// Microsoft Authentication
 	public static final String MICROSOFT_CLIENT_ID = "00000000402b5328";
 	
-	public static final String MICROSOFT_OAUTH_SERVICE = "https://login.live.com";
-	public static final String MICROSOFT_OAUTH_REDIRECT_URL = MICROSOFT_OAUTH_SERVICE + "/oauth20_desktop.srf";
-	public static final String MICROSOFT_OAUTH_ENDPOINT_AUTHORIZE = "oauth20_authorize.srf";
-	public static final String MICROSOFT_OAUTH_ENDPOINT_TOKEN = "oauth20_token.srf";
+	public static final String MICROSOFT_OAUTH_SERVICE = "https://login.microsoftonline.com/consumers/oauth2/v2.0";
+	public static final String MICROSOFT_OAUTH_REDIRECT_URL = "https://login.live.com/oauth20_desktop.srf";
+	public static final String MICROSOFT_OAUTH_ENDPOINT_AUTHORIZE = "authorize";
+	public static final String MICROSOFT_OAUTH_ENDPOINT_TOKEN = "token";
 	
 	public static final String MICROSOFT_XBL_AUTHENTICATE_URL = "https://user.auth.xboxlive.com/user/authenticate";
 	public static final String MICROSOFT_XSTS_AUTHORIZE_URL = "https://xsts.auth.xboxlive.com/xsts/authorize";
