@@ -15,6 +15,8 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBo
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftProfileResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticateResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeResponse;
@@ -94,20 +96,13 @@ public class MicrosoftService {
 		}
 	}
 	
-	public static MicrosoftResponse<String, Integer> xblAuthenticate(String accessToken, TimeoutValues timeoutValues) {
-		final JsonObject payloadObject = new JsonObject();
-		final JsonObject payloadPropertiesObject = new JsonObject();
-		payloadPropertiesObject.addProperty("AuthMethod", "RPS");
-		payloadPropertiesObject.addProperty("SiteName", "user.auth.xboxlive.com");
-		payloadPropertiesObject.addProperty("RpsTicket", "d=" + accessToken);
-		payloadObject.add("Properties", payloadPropertiesObject);
-		payloadObject.addProperty("RelyingParty", "http://auth.xboxlive.com");
-		payloadObject.addProperty("TokenType", "JWT");
+	public static MicrosoftResponse<XBLAuthenticateResponse, Integer> xblAuthenticate(String accessToken, TimeoutValues timeoutValues) {
+		final XBLAuthenticatePayload payload = new XBLAuthenticatePayload(new XBLAuthenticatePayload.Properties("RPS", "user.auth.xboxlive.com", "d=" + accessToken), "http://auth.xboxlive.com", "JWT");
 		
 		final JsonElement responseElement;
 		try {
 			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL);
-			final HttpResponse response = ConnectionUtil.jsonPostRequest(url, HttpPayload.fromJson(payloadObject), timeoutValues);
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(url, HttpPayload.fromGson(payload), timeoutValues);
 			if (response.getResponseCode() >= 400) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
@@ -117,8 +112,7 @@ public class MicrosoftService {
 		}
 		
 		try {
-			final JsonObject responseObject = responseElement.getAsJsonObject();
-			return MicrosoftResponse.ofResponse(responseObject.get("Token").getAsString());
+			return MicrosoftResponse.ofResponse(Constants.GSON.fromJson(responseElement, XBLAuthenticateResponse.class));
 		} catch (final Exception ex) {
 			return MicrosoftResponse.ofException(ex);
 		}

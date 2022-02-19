@@ -34,6 +34,10 @@ public class HttpPayload {
 		return new HttpPayload(payload.getBytes(StandardCharsets.UTF_8));
 	}
 	
+	public static HttpPayload fromGson(Object payload) {
+		return fromString(Constants.GSON.toJson(payload));
+	}
+	
 	public static HttpPayload fromJson(JsonElement payload) {
 		return fromString(Constants.GSON.toJson(payload));
 	}
