@@ -22,7 +22,7 @@ import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 public abstract class AuthenticationFile {
 	
 	/**
-	 * Reads an {@link AuthenticationFile} from an input stream.
+	 * Reads an {@link AuthenticationFile} from an input stream. The input stream is not closed.
 	 *
 	 * @param inputStream InputStream to read the data from
 	 * @return An {@link AuthenticationFile} instance
@@ -33,7 +33,18 @@ public abstract class AuthenticationFile {
 	}
 	
 	/**
-	 * Write this {@link AuthenticationFile} to an output stream.
+	 * Reads an {@link AuthenticationFile} from a byte array.
+	 * 
+	 * @param bytes Bytes of the authentication file
+	 * @return An {@link AuthenticationFile} instance
+	 * @throws IOException Error if data could not be parsed
+	 */
+	public static AuthenticationFile read(byte[] bytes) throws IOException {
+		return AuthenticationUtil.readAuthenticationFile(bytes);
+	}
+	
+	/**
+	 * Write this {@link AuthenticationFile} to an output stream. The output stream is not closed.
 	 * <p>
 	 * Attention: The data is in plain text and can be read by anyone that has access to the output stream data (e.g.
 	 * writing to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your
@@ -45,6 +56,20 @@ public abstract class AuthenticationFile {
 	 */
 	public void write(OutputStream outputStream) throws IOException {
 		AuthenticationUtil.writeAuthenticationFile(this, outputStream);
+	}
+	
+	/**
+	 * Write this {@link AuthenticationFile} to a byte array.
+	 * <p>
+	 * Attention: The data is in plain text and can be read by anyone that has access to the byte array data (e.g. writing
+	 * to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your minecraft
+	 * session that should be kept private!
+	 * </p>
+	 * 
+	 * @return Bytes of the authentication file
+	 */
+	public byte[] write() {
+		return AuthenticationUtil.writeAuthenticationFile(this);
 	}
 	
 	public static class AuthenticationFileDeserializer implements JsonDeserializer<AuthenticationFile> {

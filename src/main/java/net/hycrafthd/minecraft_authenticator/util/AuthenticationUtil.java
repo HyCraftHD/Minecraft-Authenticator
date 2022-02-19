@@ -23,17 +23,25 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 public class AuthenticationUtil {
 	
 	public static void writeAuthenticationFile(AuthenticationFile authFile, OutputStream outputStream) throws IOException {
+		outputStream.write(writeAuthenticationFile(authFile));
+	}
+	
+	public static byte[] writeAuthenticationFile(AuthenticationFile authFile) {
 		final JsonElement element = Constants.GSON.toJsonTree(authFile);
 		if (element.isJsonObject()) {
 			element.getAsJsonObject().addProperty("warning", Constants.FILE_WARNING);
 		}
 		final String json = Constants.GSON.toJson(element);
-		outputStream.write(json.getBytes(StandardCharsets.UTF_8));
+		return json.getBytes(StandardCharsets.UTF_8);
 	}
 	
 	public static AuthenticationFile readAuthenticationFile(InputStream inputStream) throws IOException {
+		return readAuthenticationFile(inputStream.readAllBytes());
+	}
+	
+	public static AuthenticationFile readAuthenticationFile(byte[] bytes) throws IOException {
 		try {
-			final String json = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+			final String json = new String(bytes, StandardCharsets.UTF_8);
 			return Constants.GSON.fromJson(json, AuthenticationFile.class);
 		} catch (final JsonParseException | IllegalStateException | ClassCastException ex) {
 			throw new IOException("Cannot parse authentication file", ex);
