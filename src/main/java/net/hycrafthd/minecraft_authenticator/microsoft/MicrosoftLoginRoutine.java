@@ -34,58 +34,76 @@ public class MicrosoftLoginRoutine {
 		} else if (oAuthResponse.hasErrorResponse()) {
 			return exception("Cannot get oAuth token because: " + oAuthResponse.getErrorResponse().get(), Optional.empty());
 		}
+		final var oAuth = successResponse(oAuthResponse);
 		
-		final var xblResponse = MicrosoftService.xblAuthenticate(oAuthResponse.getResponse().get().getAccessToken(), timeoutValues);
+		final var xblResponse = MicrosoftService.xblAuthenticate(oAuth.getAccessToken(), timeoutValues);
 		if (xblResponse.hasException()) {
-			return exception("Cannot authenticate with xbl", xblResponse.getException().get(), oAuthResponse);
+			return exception("Cannot authenticate with xbl", xblResponse.getException().get(), oAuth);
 		} else if (xblResponse.hasErrorResponse()) {
-			return exception("Cannot authenticate with xbl because the service returned http code " + xblResponse.getErrorResponse().get(), oAuthResponse);
+			return exception("Cannot authenticate with xbl because the service returned http code " + xblResponse.getErrorResponse().get(), oAuth);
 		}
+		final var xbl = successResponse(xblResponse);
 		
-		final var xstsResponse = MicrosoftService.xstsAuthorize(xblResponse.getResponse().get().getToken(), "rp://api.minecraftservices.com/", xblResponse.getResponse().get().getDisplayClaims(), timeoutValues);
-		if (xstsResponse.hasException()) {
-			return exception("Cannot authorize with xsts", xstsResponse.getException().get(), oAuthResponse);
-		} else if (xstsResponse.hasErrorResponse()) {
-			return exception("Cannot authorize with xsts because: " + xstsResponse.getErrorResponse().get(), oAuthResponse);
+		final var xBoxXstsResponse = MicrosoftService.xstsAuthorize(xbl.getToken(), "http://xboxlive.com", xbl.getDisplayClaims(), timeoutValues);
+		if (xBoxXstsResponse.hasException()) {
+			return exception("Cannot authorize with xsts for xbox services", xBoxXstsResponse.getException().get(), oAuth);
+		} else if (xBoxXstsResponse.hasErrorResponse()) {
+			return exception("Cannot authorize with xsts for xbox services because: " + xBoxXstsResponse.getErrorResponse().get(), oAuth);
 		}
+		final var xBoxXsts = successResponse(xBoxXstsResponse);
 		
-		final var minecraftLoginResponse = MicrosoftService.minecraftLoginWithXsts(new MinecraftLoginWithXBoxPayload("XBL3.0 x=" + xstsResponse.getResponse().get().getDisplayClaims().getXui().get(0).getUhs() + ";" + xstsResponse.getResponse().get().getToken()), timeoutValues);
+		final var minecraftXstsResponse = MicrosoftService.xstsAuthorize(xbl.getToken(), "rp://api.minecraftservices.com/", xbl.getDisplayClaims(), timeoutValues);
+		if (minecraftXstsResponse.hasException()) {
+			return exception("Cannot authorize with xsts for minecraft services", minecraftXstsResponse.getException().get(), oAuth);
+		} else if (minecraftXstsResponse.hasErrorResponse()) {
+			return exception("Cannot authorize with xsts for minecraft services because: " + minecraftXstsResponse.getErrorResponse().get(), oAuth);
+		}
+		final var minecraftXsts = successResponse(minecraftXstsResponse);
+		
+		final var minecraftLoginResponse = MicrosoftService.minecraftLoginWithXsts(new MinecraftLoginWithXBoxPayload("XBL3.0 x=" + minecraftXsts.getDisplayClaims().getXui().get(0).getUhs() + ";" + minecraftXsts.getToken()), timeoutValues);
 		if (minecraftLoginResponse.hasException()) {
-			return exception("Cannot login into minecraft with xbox", minecraftLoginResponse.getException().get(), oAuthResponse);
+			return exception("Cannot login into minecraft with xbox", minecraftLoginResponse.getException().get(), oAuth);
 		} else if (minecraftLoginResponse.hasErrorResponse()) {
-			return exception("Cannot login into minecraft with xbox because the service returned http code " + minecraftLoginResponse.getErrorResponse().get(), oAuthResponse);
+			return exception("Cannot login into minecraft with xbox because the service returned http code " + minecraftLoginResponse.getErrorResponse().get(), oAuth);
 		}
+		final var minecraftLogin = successResponse(minecraftLoginResponse);
 		
-		final var minecraftHasPurchasedResponse = MicrosoftService.minecraftHasPurchased(minecraftLoginResponse.getResponse().get().getAccessToken(), timeoutValues);
+		final var minecraftHasPurchasedResponse = MicrosoftService.minecraftHasPurchased(minecraftLogin.getAccessToken(), timeoutValues);
 		if (minecraftHasPurchasedResponse.hasException()) {
-			return exception("Cannot get purchase data for minecraft", minecraftHasPurchasedResponse.getException().get(), oAuthResponse);
+			return exception("Cannot get purchase data for minecraft", minecraftHasPurchasedResponse.getException().get(), oAuth);
 		} else if (minecraftHasPurchasedResponse.hasErrorResponse()) {
-			return exception("Cannot get purchase data for minecraft because the service returned http code " + minecraftHasPurchasedResponse.getErrorResponse().get(), oAuthResponse);
+			return exception("Cannot get purchase data for minecraft because the service returned http code " + minecraftHasPurchasedResponse.getErrorResponse().get(), oAuth);
 		}
+		final var minecraftHasPurchased = successResponse(minecraftHasPurchasedResponse);
 		
 		// Check if minecraft has been bought
-		if (minecraftHasPurchasedResponse.getResponse().get().getItems().size() == 0) {
-			return exception("This account does not have bought minecraft", oAuthResponse);
+		if (minecraftHasPurchased.getItems().size() == 0) {
+			return exception("This account does not have bought minecraft", oAuth);
 		}
 		
-		final var minecraftProfileResponse = MicrosoftService.minecraftProfile(minecraftLoginResponse.getResponse().get().getAccessToken(), timeoutValues);
+		final var minecraftProfileResponse = MicrosoftService.minecraftProfile(minecraftLogin.getAccessToken(), timeoutValues);
 		if (minecraftProfileResponse.hasException()) {
-			return exception("Cannot get minecraft profile data", minecraftProfileResponse.getException().get(), oAuthResponse);
+			return exception("Cannot get minecraft profile data", minecraftProfileResponse.getException().get(), oAuth);
 		} else if (minecraftProfileResponse.hasErrorResponse()) {
-			return exception("Cannot get minecraft profile data because the service returned http code " + minecraftProfileResponse.getErrorResponse().get(), oAuthResponse);
+			return exception("Cannot get minecraft profile data because the service returned http code " + minecraftProfileResponse.getErrorResponse().get(), oAuth);
 		}
+		final var minecraftProfile = successResponse(minecraftProfileResponse);
 		
-		return MicrosoftLoginResponse.ofSuccess(new User(minecraftProfileResponse.getResponse().get().getId(), minecraftProfileResponse.getResponse().get().getName(), minecraftLoginResponse.getResponse().get().getAccessToken(), "msa"), oAuthResponse.getResponse().get().getRefreshToken());
+		return MicrosoftLoginResponse.ofSuccess(new User(minecraftProfile.getId(), minecraftProfile.getName(), minecraftLogin.getAccessToken(), "msa"), oAuth.getRefreshToken());
 	}
 	
 	// Helper methods
 	
-	private static MicrosoftLoginResponse exception(String message, Throwable throwable, MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse) {
-		return exception(message, throwable, oAuthResponse.getResponse().map(OAuthTokenResponse::getRefreshToken));
+	private static <T> T successResponse(MicrosoftResponse<T, ?> response) {
+		return response.getResponse().get();
 	}
 	
-	private static MicrosoftLoginResponse exception(String message, MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse) {
-		return exception(message, oAuthResponse.getResponse().map(OAuthTokenResponse::getRefreshToken));
+	private static MicrosoftLoginResponse exception(String message, Throwable throwable, OAuthTokenResponse oAuth) {
+		return exception(message, throwable, Optional.of(oAuth.getRefreshToken()));
+	}
+	
+	private static MicrosoftLoginResponse exception(String message, OAuthTokenResponse oAuth) {
+		return exception(message, Optional.of(oAuth.getRefreshToken()));
 	}
 	
 	private static MicrosoftLoginResponse exception(String message, Throwable throwable, Optional<String> refreshToken) {
