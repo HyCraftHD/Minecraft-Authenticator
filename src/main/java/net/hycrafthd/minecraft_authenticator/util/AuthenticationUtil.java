@@ -12,8 +12,8 @@ import com.google.gson.JsonParseException;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile;
-import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationException;
+import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;

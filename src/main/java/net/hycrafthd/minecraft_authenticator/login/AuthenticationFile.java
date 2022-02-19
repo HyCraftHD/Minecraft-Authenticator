@@ -3,6 +3,7 @@ package net.hycrafthd.minecraft_authenticator.login;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -11,7 +12,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.annotations.JsonAdapter;
 
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile.AuthenticationFileDeserializer;
-import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
+import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
 /**
@@ -46,17 +47,10 @@ public abstract class AuthenticationFile {
 		AuthenticationUtil.writeAuthenticationFile(this, outputStream);
 	}
 	
-	/**
-	 * The refresh token for microsoft oAuth
-	 *
-	 * @return Refresh token
-	 */
-	public abstract String getRefreshToken();
-	
 	public static class AuthenticationFileDeserializer implements JsonDeserializer<AuthenticationFile> {
 		
 		@Override
-		public AuthenticationFile deserialize(JsonElement json, java.lang.reflect.Type typeOf, JsonDeserializationContext context) throws JsonParseException {
+		public AuthenticationFile deserialize(JsonElement json, Type typeOf, JsonDeserializationContext context) throws JsonParseException {
 			return new MicrosoftAuthenticationFile(json.getAsJsonObject().get("refreshToken").getAsString());
 		}
 	}

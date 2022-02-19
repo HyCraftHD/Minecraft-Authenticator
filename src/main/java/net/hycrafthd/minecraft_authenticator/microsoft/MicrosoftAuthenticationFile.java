@@ -1,4 +1,4 @@
-package net.hycrafthd.minecraft_authenticator.login.file;
+package net.hycrafthd.minecraft_authenticator.microsoft;
 
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile;
 
@@ -10,7 +10,11 @@ public class MicrosoftAuthenticationFile extends AuthenticationFile {
 		this.refreshToken = refreshToken;
 	}
 	
-	@Override
+	/**
+	 * The refresh token for microsoft oAuth
+	 *
+	 * @return Refresh token
+	 */
 	public String getRefreshToken() {
 		return refreshToken;
 	}

@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
-import net.hycrafthd.minecraft_authenticator.login.file.MicrosoftAuthenticationFile;
+import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
