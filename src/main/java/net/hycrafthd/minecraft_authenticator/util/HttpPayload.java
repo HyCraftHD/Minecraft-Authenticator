@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import com.google.gson.JsonElement;
+
 import net.hycrafthd.minecraft_authenticator.Constants;
 
 public class HttpPayload {
@@ -32,7 +34,7 @@ public class HttpPayload {
 		return new HttpPayload(payload.getBytes(StandardCharsets.UTF_8));
 	}
 	
-	public static HttpPayload fromGson(Object payload) {
+	public static HttpPayload fromJson(JsonElement payload) {
 		return fromString(Constants.GSON.toJson(payload));
 	}
 }

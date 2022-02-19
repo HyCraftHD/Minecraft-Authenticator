@@ -13,8 +13,8 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftHasPurchased
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxPayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftProfileResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticateResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeResponse;
@@ -86,27 +86,42 @@ public class MicrosoftService {
 		try {
 			final JsonObject responseObject = responseElement.getAsJsonObject();
 			if (responseObject.has("error")) {
-				return MicrosoftResponse.ofError(new OAuthErrorResponse(responseObject.get("error").getAsString(), responseObject.get("error_description").getAsString(), responseObject.get("correlation_id").getAsString()));
+				return MicrosoftResponse.ofError(Constants.GSON.fromJson(responseObject, OAuthErrorResponse.class));
 			}
-			return MicrosoftResponse.ofResponse(new OAuthTokenResponse(responseObject.get("refresh_token").getAsString(), responseObject.get("access_token").getAsString()));
+			return MicrosoftResponse.ofResponse(Constants.GSON.fromJson(responseObject, OAuthTokenResponse.class));
 		} catch (final Exception ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 	}
 	
-	public static MicrosoftResponse<XBLAuthenticateResponse, Integer> xblAuthenticate(XBLAuthenticatePayload payload, TimeoutValues timeoutValues) {
-		final String responseString;
+	public static MicrosoftResponse<String, Integer> xblAuthenticate(String accessToken, TimeoutValues timeoutValues) {
+		final JsonObject payloadObject = new JsonObject();
+		final JsonObject payloadPropertiesObject = new JsonObject();
+		payloadPropertiesObject.addProperty("AuthMethod", "RPS");
+		payloadPropertiesObject.addProperty("SiteName", "user.auth.xboxlive.com");
+		payloadPropertiesObject.addProperty("RpsTicket", "d=" + accessToken);
+		payloadObject.add("Properties", payloadPropertiesObject);
+		payloadObject.addProperty("RelyingParty", "http://auth.xboxlive.com");
+		payloadObject.addProperty("TokenType", "JWT");
+		
+		final JsonElement responseElement;
 		try {
-			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL), HttpPayload.fromString(Constants.GSON.toJson(payload)), timeoutValues);
-			responseString = response.getAsString();
-			if (response.getResponseCode() >= 300) {
+			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBL_AUTHENTICATE_URL);
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(url, HttpPayload.fromJson(payloadObject), timeoutValues);
+			if (response.getResponseCode() >= 400) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
+			responseElement = JsonParser.parseString(response.getAsString());
 		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
-		final XBLAuthenticateResponse response = Constants.GSON.fromJson(responseString, XBLAuthenticateResponse.class);
-		return MicrosoftResponse.ofResponse(response);
+		
+		try {
+			final JsonObject responseObject = responseElement.getAsJsonObject();
+			return MicrosoftResponse.ofResponse(responseObject.get("Token").getAsString());
+		} catch (final Exception ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
 	}
 	
 	public static MicrosoftResponse<XSTSAuthorizeResponse, XSTSAuthorizeErrorResponse> xstsAuthorize(XSTSAuthorizePayload payload, TimeoutValues timeoutValues) {
@@ -118,6 +133,9 @@ public class MicrosoftService {
 		}
 		
 		final JsonElement element = JsonParser.parseString(responseString);
+		
+		System.out.println(element);
+		
 		if (element.isJsonObject() && element.getAsJsonObject().get("XErr") != null) {
 			final XSTSAuthorizeErrorResponse response = Constants.GSON.fromJson(responseString, XSTSAuthorizeErrorResponse.class);
 			return MicrosoftResponse.ofError(response);
@@ -130,7 +148,7 @@ public class MicrosoftService {
 	public static MicrosoftResponse<MinecraftLoginWithXBoxResponse, Integer> minecraftLoginWithXsts(MinecraftLoginWithXBoxPayload payload, TimeoutValues timeoutValues) {
 		final String responseString;
 		try {
-			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromGson(payload), timeoutValues);
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromString(Constants.GSON.toJson(payload)), timeoutValues);
 			responseString = response.getAsString();
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
@@ -173,12 +191,6 @@ public class MicrosoftService {
 		
 		final MinecraftProfileResponse response = Constants.GSON.fromJson(responseString, MinecraftProfileResponse.class);
 		return MicrosoftResponse.ofResponse(response);
-	}
-	
-	public static record OAuthTokenResponse(String refreshToken, String accessToken) {
-	}
-	
-	public static record OAuthErrorResponse(String error, String errorDescription, String correlationId) {
 	}
 	
 }
