@@ -11,8 +11,8 @@ import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftHasPurchasedResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxPayload;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLauncherLoginPayload;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLauncherLoginResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftProfileResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
@@ -161,20 +161,27 @@ public class MicrosoftService {
 		}
 	}
 	
-	public static MicrosoftResponse<MinecraftLoginWithXBoxResponse, Integer> minecraftLoginWithXsts(MinecraftLoginWithXBoxPayload payload, TimeoutValues timeoutValues) {
-		final String responseString;
+	public static MicrosoftResponse<MinecraftLauncherLoginResponse, Integer> minecraftLaucherLogin(String xstsToken, XBoxResponse.DisplayClaims displayClaims, TimeoutValues timeoutValues) {
+		final MinecraftLauncherLoginPayload payload = new MinecraftLauncherLoginPayload("XBL3.0 x=" + displayClaims.getXui().get(0).getUhs() + ";" + xstsToken, "PC_LAUNCHER");
+		
+		final JsonElement responseElement;
 		try {
-			final HttpResponse response = ConnectionUtil.jsonPostRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_XBOX_LOGIN), HttpPayload.fromString(Constants.GSON.toJson(payload)), timeoutValues);
-			responseString = response.getAsString();
-			if (response.getResponseCode() >= 300) {
+			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_LAUNCHER_LOGIN);
+			final HttpResponse response = ConnectionUtil.jsonPostRequest(url, HttpPayload.fromGson(payload), timeoutValues);
+			if (response.getResponseCode() >= 400) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
+			responseElement = JsonParser.parseString(response.getAsString());
 		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
-		final MinecraftLoginWithXBoxResponse response = Constants.GSON.fromJson(responseString, MinecraftLoginWithXBoxResponse.class);
-		return MicrosoftResponse.ofResponse(response);
+		try {
+			final MinecraftLauncherLoginResponse response = Constants.GSON.fromJson(responseElement, MinecraftLauncherLoginResponse.class);
+			return MicrosoftResponse.ofResponse(response);
+		} catch (final Exception ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
 	}
 	
 	public static MicrosoftResponse<MinecraftHasPurchasedResponse, Integer> minecraftHasPurchased(String accessToken, TimeoutValues timeoutValues) {

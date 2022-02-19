@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 
-public class MinecraftLoginWithXBoxResponse {
+public class MinecraftLauncherLoginResponse {
 	
 	private final String username;
 	private final List<String> roles;
@@ -15,7 +15,7 @@ public class MinecraftLoginWithXBoxResponse {
 	@SerializedName("expires_in")
 	private final long expiresIn;
 	
-	public MinecraftLoginWithXBoxResponse(String username, List<String> roles, String accessToken, String tokenType, long expiresIn) {
+	public MinecraftLauncherLoginResponse(String username, List<String> roles, String accessToken, String tokenType, long expiresIn) {
 		this.username = username;
 		this.roles = roles;
 		this.accessToken = accessToken;

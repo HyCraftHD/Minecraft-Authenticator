@@ -3,7 +3,7 @@ package net.hycrafthd.minecraft_authenticator.microsoft;
 import java.util.Optional;
 
 import net.hycrafthd.minecraft_authenticator.login.User;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLoginWithXBoxPayload;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.MinecraftLauncherLoginPayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
@@ -60,7 +60,7 @@ public class MicrosoftLoginRoutine {
 		}
 		final var minecraftXsts = successResponse(minecraftXstsResponse);
 		
-		final var minecraftLoginResponse = MicrosoftService.minecraftLoginWithXsts(new MinecraftLoginWithXBoxPayload("XBL3.0 x=" + minecraftXsts.getDisplayClaims().getXui().get(0).getUhs() + ";" + minecraftXsts.getToken()), timeoutValues);
+		final var minecraftLoginResponse = MicrosoftService.minecraftLaucherLogin(minecraftXsts.getToken(), minecraftXsts.getDisplayClaims(), timeoutValues);
 		if (minecraftLoginResponse.hasException()) {
 			return exception("Cannot login into minecraft with xbox", minecraftLoginResponse.getException().get(), oAuth);
 		} else if (minecraftLoginResponse.hasErrorResponse()) {
