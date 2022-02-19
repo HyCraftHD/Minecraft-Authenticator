@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
@@ -65,6 +66,6 @@ public class AuthenticationUtil {
 			throw new MicrosoftAuthenticationException("Cannot get oAuth token because: " + microsoftResponse.getErrorResponse().get());
 		}
 		final OAuthTokenResponse response = microsoftResponse.getResponse().get();
-		return new MicrosoftAuthenticationFile(response.getRefreshToken());
+		return new MicrosoftAuthenticationFile(UUID.randomUUID(), response.getRefreshToken());
 	}
 }

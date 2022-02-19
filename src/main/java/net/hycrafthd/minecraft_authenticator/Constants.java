@@ -25,6 +25,8 @@ public class Constants {
 	public static final String MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED = "entitlements/mcstore";
 	public static final String MICROSOFT_MINECRAFT_ENDPOINT_PROFILE = "minecraft/profile";
 	
+	public static final String MICROSOFT_XBOX_PROFILE_SETTINGS_URL = "https://profile.xboxlive.com/users/me/profile/settings";
+	
 	// File warning
 	public static final String FILE_WARNING = "DO NOT SHARE THIS FILE. IT CONTAINS LOGIN INFORMATION FOR YOUR MINECRAFT ACCOUNT!";
 	

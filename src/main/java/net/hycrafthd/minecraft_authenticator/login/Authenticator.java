@@ -297,7 +297,7 @@ public class Authenticator {
 				}
 				
 				if (response.hasRefreshToken()) {
-					resultFile = new MicrosoftAuthenticationFile(response.getRefreshToken().get());
+					resultFile = new MicrosoftAuthenticationFile(microsoftFile.getClientId(), response.getRefreshToken().get());
 				}
 				
 				loginResponse = response;

@@ -33,8 +33,13 @@ public class ConnectionUtil {
 	}
 	
 	public static HttpResponse bearerAuthorizationJsonGetRequest(URL url, String token, TimeoutValues timeoutValues) throws IOException {
+		return authorizationJsonGetRequest(url, "Bearer " + token, NO_OP, timeoutValues);
+	}
+	
+	public static HttpResponse authorizationJsonGetRequest(URL url, String authorization, ConsumerWithIOException<HttpURLConnection> preConnect, TimeoutValues timeoutValues) throws IOException {
 		return getRequest(url, JSON_CONTENT_TYPE, urlConnection -> {
-			urlConnection.setRequestProperty("Authorization", "Bearer " + token);
+			urlConnection.setRequestProperty("Authorization", authorization);
+			preConnect.accept(urlConnection);
 		}, timeoutValues);
 	}
 	

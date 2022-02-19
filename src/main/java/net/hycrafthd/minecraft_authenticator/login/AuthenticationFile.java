@@ -3,16 +3,21 @@ package net.hycrafthd.minecraft_authenticator.login;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
+import java.util.UUID;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.annotations.SerializedName;
 
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile.AuthenticationFileDeserializer;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
+import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile.MicrosoftAuthenticationFileDeserializer;
 import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
 
 /**
@@ -20,6 +25,27 @@ import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
  */
 @JsonAdapter(AuthenticationFileDeserializer.class)
 public abstract class AuthenticationFile {
+	
+	private final Type type;
+	private final UUID clientId;
+	
+	protected AuthenticationFile(Type type, UUID clientId) {
+		this.type = type;
+		this.clientId = clientId;
+	}
+	
+	public Type getType() {
+		return type;
+	}
+	
+	public UUID getClientId() {
+		return clientId;
+	}
+	
+	public static enum Type {
+		@SerializedName("microsoft")
+		MICROSOFT;
+	}
 	
 	/**
 	 * Reads an {@link AuthenticationFile} from an input stream. The input stream is not closed.
@@ -72,11 +98,27 @@ public abstract class AuthenticationFile {
 		return AuthenticationUtil.writeAuthenticationFile(this);
 	}
 	
-	public static class AuthenticationFileDeserializer implements JsonDeserializer<AuthenticationFile> {
+	public static class AuthenticationFileDeserializer implements JsonDeserializer<AuthenticationFile>, JsonSerializer<AuthenticationFile> {
 		
 		@Override
-		public AuthenticationFile deserialize(JsonElement json, Type typeOf, JsonDeserializationContext context) throws JsonParseException {
-			return new MicrosoftAuthenticationFile(json.getAsJsonObject().get("refreshToken").getAsString());
+		public AuthenticationFile deserialize(JsonElement json, java.lang.reflect.Type typeOf, JsonDeserializationContext context) throws JsonParseException {
+			final JsonObject object = json.getAsJsonObject();
+			final Type type = context.deserialize(object.get("type"), Type.class);
+			
+			if (type == Type.MICROSOFT) {
+				return MicrosoftAuthenticationFileDeserializer.INSTANCE.deserialize(json, typeOf, context);
+			} else {
+				throw new JsonParseException("Type must be 'microsoft'");
+			}
+		}
+		
+		@Override
+		public JsonElement serialize(AuthenticationFile src, java.lang.reflect.Type typeOfSrc, JsonSerializationContext context) {
+			if (src.type == Type.MICROSOFT && src instanceof MicrosoftAuthenticationFile microsoftSrc) {
+				return MicrosoftAuthenticationFileDeserializer.INSTANCE.serialize(microsoftSrc, typeOfSrc, context);
+			} else {
+				throw new IllegalStateException("Type must be 'microsoft'");
+			}
 		}
 	}
 }
