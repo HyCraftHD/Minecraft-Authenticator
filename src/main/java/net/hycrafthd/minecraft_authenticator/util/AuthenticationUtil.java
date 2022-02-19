@@ -14,10 +14,10 @@ import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationException;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
+import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService.OAuthErrorResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 
 public class AuthenticationUtil {
@@ -65,6 +65,6 @@ public class AuthenticationUtil {
 			throw new MicrosoftAuthenticationException("Cannot get oAuth token because: " + microsoftResponse.getErrorResponse().get());
 		}
 		final OAuthTokenResponse response = microsoftResponse.getResponse().get();
-		return new MicrosoftAuthenticationFile(response.getRefreshToken());
+		return new MicrosoftAuthenticationFile(response.refreshToken());
 	}
 }
