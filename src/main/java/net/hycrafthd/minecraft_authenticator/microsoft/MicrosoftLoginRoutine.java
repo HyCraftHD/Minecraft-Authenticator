@@ -1,6 +1,5 @@
 package net.hycrafthd.minecraft_authenticator.microsoft;
 
-import java.util.Base64;
 import java.util.Optional;
 
 import net.hycrafthd.minecraft_authenticator.login.User;
@@ -9,6 +8,7 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
+import net.hycrafthd.minecraft_authenticator.util.ParseUtil;
 
 public class MicrosoftLoginRoutine {
 	
@@ -89,19 +89,16 @@ public class MicrosoftLoginRoutine {
 		}
 		final var minecraftProfile = successResponse(minecraftProfileResponse);
 		
-		// DEBUG
+		// TODO call this only when requested and save data some where
 		MicrosoftService.xboxProfile(xBoxXsts.getToken(), xBoxXsts.getDisplayClaims(), timeoutValues);
 		
-		String[] chunks = minecraftLogin.getAccessToken().split("\\.");
-		System.out.println(chunks.length);
-		Base64.Decoder decoder = Base64.getUrlDecoder();
-		
-		String header = new String(decoder.decode(chunks[0]));
-		String payload = new String(decoder.decode(chunks[1]));
-		String payloadx = new String(decoder.decode(chunks[2]));
-		System.out.println(header);
-		System.out.println(payload);
-		System.out.println(payloadx);
+		// Parse minecraft access token and extract xuid
+		try {
+			final String jwt = ParseUtil.decodeJWT(minecraftLogin.getAccessToken());
+			System.out.println(jwt);
+		} catch (final Exception ex) {
+			return exception("Could not parse minecraft access token", oAuth);
+		}
 		
 		return MicrosoftLoginResponse.ofSuccess(new User(minecraftProfile.getId(), minecraftProfile.getName(), minecraftLogin.getAccessToken(), "msa"), oAuth.getRefreshToken());
 	}
