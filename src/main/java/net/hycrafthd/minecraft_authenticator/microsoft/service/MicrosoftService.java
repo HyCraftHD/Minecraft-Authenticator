@@ -68,7 +68,7 @@ public class MicrosoftService {
 		try {
 			return ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_AUTHORIZE, parameters);
 		} catch (final MalformedURLException ex) {
-			throw new AssertionError("This url should never be malformed.");
+			throw new AssertionError("This url should never be malformed.", ex);
 		}
 	}
 	
