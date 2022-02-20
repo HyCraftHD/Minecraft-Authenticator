@@ -208,19 +208,24 @@ public class MicrosoftService {
 	}
 	
 	public static MicrosoftResponse<MinecraftProfileResponse, Integer> minecraftProfile(String accessToken, TimeoutValues timeoutValues) {
-		final String responseString;
+		final JsonElement responseElement;
 		try {
-			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_PROFILE), accessToken, timeoutValues);
-			responseString = response.getAsString();
-			if (response.getResponseCode() >= 300) {
+			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_PROFILE);
+			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(url, accessToken, timeoutValues);
+			if (response.getResponseCode() >= 400) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
+			responseElement = JsonParser.parseString(response.getAsString());
 		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
-		final MinecraftProfileResponse response = Constants.GSON.fromJson(responseString, MinecraftProfileResponse.class);
-		return MicrosoftResponse.ofResponse(response);
+		try {
+			final MinecraftProfileResponse response = Constants.GSON.fromJson(responseElement, MinecraftProfileResponse.class);
+			return MicrosoftResponse.ofResponse(response);
+		} catch (final Exception ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
 	}
 	
 	public static MicrosoftResponse<JsonElement, Integer> xboxProfile(String xstsToken, XBoxResponse.DisplayClaims displayClaims, TimeoutValues timeoutValues) {

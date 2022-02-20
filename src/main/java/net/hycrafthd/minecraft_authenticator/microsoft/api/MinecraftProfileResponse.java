@@ -82,11 +82,37 @@ public class MinecraftProfileResponse {
 	
 	public static class Cape {
 		
-		// TODO what fields do cape has?
+		private final String id;
+		private final String state;
+		private final String url;
+		private final String alias;
+		
+		public Cape(String id, String state, String url, String alias) {
+			this.id = id;
+			this.state = state;
+			this.url = url;
+			this.alias = alias;
+		}
+		
+		public String getId() {
+			return id;
+		}
+		
+		public String getState() {
+			return state;
+		}
+		
+		public String getUrl() {
+			return url;
+		}
+		
+		public String getAlias() {
+			return alias;
+		}
 		
 		@Override
 		public String toString() {
-			return "Cape []";
+			return "Cape [id=" + id + ", state=" + state + ", url=" + url + ", alias=" + alias + "]";
 		}
 	}
 }
