@@ -1,10 +1,15 @@
 package net.hycrafthd.minecraft_authenticator.test;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
+import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.login.User;
 
@@ -21,7 +26,7 @@ public class CustomAzureApplicationMain {
 			
 			System.out.println(Authenticator.microsoftLogin(AZURE_CLIENT_ID, redirectUrl));
 			
-			// Desktop.getDesktop().browse(Authenticator.microsoftLogin(AZURE_CLIENT_ID, redirectUrl).toURI());
+			Desktop.getDesktop().browse(Authenticator.microsoftLogin(AZURE_CLIENT_ID, redirectUrl).toURI());
 			
 			final Socket socket = server.accept();
 			final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -34,7 +39,14 @@ public class CustomAzureApplicationMain {
 			final Authenticator authenticator = Authenticator.ofMicrosoft(authCode).customAzureApplication(AZURE_CLIENT_ID, redirectUrl).serviceConnectTimeout(5000).serviceReadTimeout(10000).shouldAuthenticate().run();
 			final User user = authenticator.getUser().get();
 			System.out.println(user);
-			System.out.println(authenticator.getResultFile().writeString());
+			
+			System.out.println(authenticator.getResultFile());
+			final byte[] bytes = authenticator.getResultFile().writeCompressed();
+			
+			Files.write(Paths.get("file"), bytes, StandardOpenOption.CREATE);
+			
+			System.out.println(AuthenticationFile.readCompressed(bytes));
+			
 		}
 	}
 	

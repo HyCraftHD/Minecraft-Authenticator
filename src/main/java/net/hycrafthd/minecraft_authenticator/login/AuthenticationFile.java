@@ -3,6 +3,7 @@ package net.hycrafthd.minecraft_authenticator.login;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.UUID;
 
 import com.google.gson.JsonObject;
@@ -27,6 +28,23 @@ public abstract class AuthenticationFile {
 	 */
 	public UUID getClientId() {
 		return clientId;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(clientId);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AuthenticationFile other = (AuthenticationFile) obj;
+		return Objects.equals(clientId, other.clientId);
 	}
 	
 	@Override

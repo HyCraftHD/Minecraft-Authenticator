@@ -63,6 +63,7 @@ public class AuthenticationFileUtil {
 		try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); //
 				final GZIPOutputStream gZipOutputStream = new GZIPOutputStream(outputStream)) {
 			gZipOutputStream.write(bytes);
+			gZipOutputStream.finish();
 			return outputStream.toByteArray();
 		}
 	}
