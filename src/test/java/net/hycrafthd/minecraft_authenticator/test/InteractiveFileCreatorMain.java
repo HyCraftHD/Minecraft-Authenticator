@@ -32,7 +32,7 @@ public class InteractiveFileCreatorMain {
 					final String authCode = reader.readLine();
 					try (OutputStream outputStream = Files.newOutputStream(authFile, StandardOpenOption.CREATE)) {
 						final Authenticator authenticator = Authenticator.ofMicrosoft(authCode).run();
-						authenticator.getResultFile().write(outputStream);
+						authenticator.getResultFile().writeCompressed(outputStream);
 					} catch (IOException | AuthenticationException ex) {
 						throw new IllegalStateException("An error occured while trying to create auth file", ex);
 					}

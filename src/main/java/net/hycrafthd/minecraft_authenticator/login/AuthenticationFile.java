@@ -5,120 +5,135 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.JsonAdapter;
-import com.google.gson.annotations.SerializedName;
 
-import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile.AuthenticationFileDeserializer;
-import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
-import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile.MicrosoftAuthenticationFileDeserializer;
-import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
+import net.hycrafthd.minecraft_authenticator.util.AuthenticationFileUtil;
 
 /**
  * File that contains authentication information.
  */
-@JsonAdapter(AuthenticationFileDeserializer.class)
 public abstract class AuthenticationFile {
 	
-	private final Type type;
 	private final UUID clientId;
 	
-	protected AuthenticationFile(Type type, UUID clientId) {
-		this.type = type;
+	protected AuthenticationFile(UUID clientId) {
 		this.clientId = clientId;
 	}
 	
-	public Type getType() {
-		return type;
-	}
-	
+	/**
+	 * The client id that is used for certain requests
+	 * 
+	 * @return Client id
+	 */
 	public UUID getClientId() {
 		return clientId;
 	}
 	
-	public static enum Type {
-		@SerializedName("microsoft")
-		MICROSOFT;
+	@Override
+	public String toString() {
+		return "AuthenticationFile [clientId=" + clientId + "]";
 	}
 	
 	/**
-	 * Reads an {@link AuthenticationFile} from an input stream. The input stream is not closed.
+	 * Reads an {@link AuthenticationFile} from an input stream with with gzip compression.. The input stream is not closed.
 	 *
-	 * @param inputStream InputStream to read the data from
+	 * @param inputStream InputStream to read the compressed data from
 	 * @return An {@link AuthenticationFile} instance
-	 * @throws IOException Error if data could not be parsed
+	 * @throws IOException Error if data could not be uncompressed or parsed
 	 */
-	public static AuthenticationFile read(InputStream inputStream) throws IOException {
-		return AuthenticationUtil.readAuthenticationFile(inputStream);
+	public static AuthenticationFile readCompressed(InputStream inputStream) throws IOException {
+		return AuthenticationFileUtil.fromCompressedInputStream(inputStream);
 	}
 	
 	/**
-	 * Reads an {@link AuthenticationFile} from a byte array.
+	 * Reads an {@link AuthenticationFile} from a byte array with with gzip compression.
 	 * 
-	 * @param bytes Bytes of the authentication file
+	 * @param bytes Compressed byte array of the authentication file
 	 * @return An {@link AuthenticationFile} instance
-	 * @throws IOException Error if data could not be parsed
+	 * @throws IOException Error if data could not be uncompressed or parsed
 	 */
-	public static AuthenticationFile read(byte[] bytes) throws IOException {
-		return AuthenticationUtil.readAuthenticationFile(bytes);
+	public static AuthenticationFile readCompressed(byte[] bytes) throws IOException {
+		return AuthenticationFileUtil.fromCompressedBytes(bytes);
 	}
 	
 	/**
-	 * Write this {@link AuthenticationFile} to an output stream. The output stream is not closed.
+	 * Reads an {@link AuthenticationFile} from a string.
+	 * 
+	 * @param string Serialized authentication file
+	 * @return An {@link AuthenticationFile} instance
+	 * @throws IOException Error if data could not be parsed
+	 */
+	public static AuthenticationFile readString(String string) throws IOException {
+		return AuthenticationFileUtil.fromString(string);
+	}
+	
+	/**
+	 * Deserialize an {@link AuthenticationFile} from a {@link JsonObject}
+	 * 
+	 * @param object Json object containing the {@link AuthenticationFile} data
+	 * @return An {@link AuthenticationFile} instance
+	 * @throws IOException Error if data could not be parsed
+	 */
+	public static AuthenticationFile deserialize(JsonObject object) throws IOException {
+		return AuthenticationFileUtil.fromJson(object);
+	}
+	
+	/**
+	 * Write this {@link AuthenticationFile} to an output stream with gzip compression. The output stream is not closed.
 	 * <p>
 	 * Attention: The data is in plain text and can be read by anyone that has access to the output stream data (e.g.
 	 * writing to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your
 	 * minecraft session that should be kept private!
 	 * </p>
 	 *
-	 * @param outputStream Output stream to write the {@link AuthenticationFile} to
-	 * @throws IOException Errors if output stream is not writable
+	 * @param outputStream Output stream to write the compressed {@link AuthenticationFile} to
+	 * @throws IOException Error if data could be be compressed
 	 */
-	public void write(OutputStream outputStream) throws IOException {
-		AuthenticationUtil.writeAuthenticationFile(this, outputStream);
+	public void writeCompressed(OutputStream outputStream) throws IOException {
+		AuthenticationFileUtil.toCompressedOutputStream(this, outputStream);
 	}
 	
 	/**
-	 * Write this {@link AuthenticationFile} to a byte array.
+	 * Write this {@link AuthenticationFile} to a byte array with gzip compression.
 	 * <p>
 	 * Attention: The data is in plain text and can be read by anyone that has access to the byte array data (e.g. writing
 	 * to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your minecraft
 	 * session that should be kept private!
 	 * </p>
 	 * 
-	 * @return Bytes of the authentication file
+	 * @return Compressed byte array of the authentication file
+	 * @throws IOException Error if data could be be compressed
 	 */
-	public byte[] write() {
-		return AuthenticationUtil.writeAuthenticationFile(this);
+	public byte[] writeCompressed() throws IOException {
+		return AuthenticationFileUtil.toCompressedBytes(this);
 	}
 	
-	public static class AuthenticationFileDeserializer implements JsonDeserializer<AuthenticationFile>, JsonSerializer<AuthenticationFile> {
-		
-		@Override
-		public AuthenticationFile deserialize(JsonElement json, java.lang.reflect.Type typeOf, JsonDeserializationContext context) throws JsonParseException {
-			final JsonObject object = json.getAsJsonObject();
-			final Type type = context.deserialize(object.get("type"), Type.class);
-			
-			if (type == Type.MICROSOFT) {
-				return MicrosoftAuthenticationFileDeserializer.INSTANCE.deserialize(json, typeOf, context);
-			} else {
-				throw new JsonParseException("Type must be 'microsoft'");
-			}
-		}
-		
-		@Override
-		public JsonElement serialize(AuthenticationFile src, java.lang.reflect.Type typeOfSrc, JsonSerializationContext context) {
-			if (src.type == Type.MICROSOFT && src instanceof MicrosoftAuthenticationFile microsoftSrc) {
-				return MicrosoftAuthenticationFileDeserializer.INSTANCE.serialize(microsoftSrc, typeOfSrc, context);
-			} else {
-				throw new IllegalStateException("Type must be 'microsoft'");
-			}
-		}
+	/**
+	 * Write this {@link AuthenticationFile} to a string.
+	 * <p>
+	 * Attention: The data is in plain text and can be read by anyone that has access to the byte array data (e.g. writing
+	 * to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your minecraft
+	 * session that should be kept private!
+	 * </p>
+	 * 
+	 * @return Serialized string of the authentication file
+	 */
+	public String writeString() {
+		return AuthenticationFileUtil.toString(this);
 	}
+	
+	/**
+	 * Serialize this {@link AuthenticationFile} to a {@link JsonObject}.
+	 * <p>
+	 * Attention: The data is in plain text and can be read by anyone that has access to the byte array data (e.g. writing
+	 * to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your minecraft
+	 * session that should be kept private!
+	 * </p>
+	 * 
+	 * @return Json object containing the {@link AuthenticationFile} data
+	 */
+	public JsonObject serialize() {
+		return AuthenticationFileUtil.toJson(this);
+	}
+	
 }

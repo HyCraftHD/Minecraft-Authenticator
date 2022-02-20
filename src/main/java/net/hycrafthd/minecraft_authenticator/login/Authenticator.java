@@ -11,7 +11,7 @@ import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFi
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
-import net.hycrafthd.minecraft_authenticator.util.AuthenticationUtil;
+import net.hycrafthd.minecraft_authenticator.util.AuthenticationFileUtil;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 
 /**
@@ -125,7 +125,7 @@ public class Authenticator {
 	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder ofMicrosoft(String authorizationCode) {
-		return new Builder((customAzureApplication, timeoutValues) -> AuthenticationUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode, timeoutValues));
+		return new Builder((customAzureApplication, timeoutValues) -> AuthenticationFileUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode, timeoutValues));
 	}
 	
 	/**

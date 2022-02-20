@@ -220,17 +220,14 @@ public class MicrosoftService {
 		final JsonElement responseElement;
 		try {
 			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBOX_PROFILE_SETTINGS_URL, Parameters.create().add("settings", "GameDisplayName,AppDisplayName,AppDisplayPicRaw,GameDisplayPicRaw,PublicGamerpic,ShowUserAsAvatar,Gamerscore,Gamertag,ModernGamertag,ModernGamertagSuffix,UniqueModernGamertag,AccountTier,TenureLevel,XboxOneRep,PreferredColor,Location,Bio,Watermarks,RealName,RealNameOverride,IsQuarantined"));
-			System.out.println(url);
+			System.out.println(url); // TODO cleanup
 			final HttpResponse response = ConnectionUtil.authorizationJsonGetRequest(url, "XBL3.0 x=" + displayClaims.getXui().get(0).getUhs() + ";" + xstsToken, urlConnection -> {
 				urlConnection.addRequestProperty("x-xbl-contract-version", "3");
 			}, timeoutValues);
-			System.out.println(response.getResponseCode());
 			// if (response.getResponseCode() >= 400) {
 			// return MicrosoftResponse.ofError(response.getResponseCode());
 			// }
-			System.out.println(response.getAsString());
 			responseElement = JsonParser.parseString(response.getAsString());
-			System.out.println(responseElement);
 		} catch (final IOException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
