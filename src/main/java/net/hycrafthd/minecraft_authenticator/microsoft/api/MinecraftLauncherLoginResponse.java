@@ -45,7 +45,7 @@ public class MinecraftLauncherLoginResponse {
 	
 	@Override
 	public String toString() {
-		return "MinecraftLoginWithXBoxResponse [username=" + username + ", roles=" + roles + ", accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn=" + expiresIn + "]";
+		return "MinecraftLauncherLoginResponse [username=" + username + ", roles=" + roles + ", accessToken=" + accessToken + ", tokenType=" + tokenType + ", expiresIn=" + expiresIn + "]";
 	}
 	
 }

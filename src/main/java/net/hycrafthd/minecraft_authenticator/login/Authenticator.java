@@ -170,6 +170,7 @@ public class Authenticator {
 		
 		private final AuthenticationFileFunctionWithCustomAzureApplication fileFunction;
 		private boolean authenticate;
+		private boolean retrieveXBoxProfile;
 		private Optional<AzureApplication> customAzureApplication;
 		private int serviceConnectTimeout;
 		private int serviceReadTimeout;
@@ -205,6 +206,17 @@ public class Authenticator {
 		 */
 		public Builder shouldAuthenticate() {
 			authenticate = true;
+			return this;
+		}
+		
+		/**
+		 * Call this if you want to get a {@link XBoxProfile} object. Only available for microsoft accounts. Only has an effect
+		 * if {@link #shouldAuthenticate()} is called.
+		 * 
+		 * @return This builder
+		 */
+		public Builder shouldRetrieveXBoxProfile() {
+			retrieveXBoxProfile = true;
 			return this;
 		}
 		
@@ -251,13 +263,14 @@ public class Authenticator {
 		 * @return Build Authenticator object
 		 */
 		public Authenticator build() {
-			return new Authenticator(fileFunction, authenticate, customAzureApplication, new TimeoutValues(serviceConnectTimeout, serviceReadTimeout));
+			return new Authenticator(fileFunction, authenticate, retrieveXBoxProfile, customAzureApplication, new TimeoutValues(serviceConnectTimeout, serviceReadTimeout));
 		}
 		
 	}
 	
 	private final AuthenticationFileFunctionWithCustomAzureApplication fileFunction;
 	private final boolean authenticate;
+	private final boolean retrieveXBoxProfile;
 	private final Optional<AzureApplication> customAzureApplication;
 	private final TimeoutValues timeoutValues;
 	
@@ -265,22 +278,26 @@ public class Authenticator {
 	
 	private AuthenticationFile resultFile;
 	private Optional<User> user;
+	private Optional<XBoxProfile> xBoxProfile;
 	
 	/**
 	 * Internal constructor to setup the authenticator state. To execute the authentication run the {@link #run()} method.
 	 *
 	 * @param fileFunction Function that returns {@link AuthenticationFile} for authentication
 	 * @param authenticate Should authenticate to get a {@link User} as a result
+	 * @param retrieveXBoxProfile Should retrieve an {@link XBoxProfile} object
 	 * @param customAzureApplication Optional value to pass custom azure application values
 	 * @param timeoutValues Timeout values for a service connection
 	 */
-	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, Optional<AzureApplication> customAzureApplication, TimeoutValues timeoutValues) {
+	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, boolean retrieveXBoxProfile, Optional<AzureApplication> customAzureApplication, TimeoutValues timeoutValues) {
 		this.fileFunction = fileFunction;
 		this.authenticate = authenticate;
+		this.retrieveXBoxProfile = retrieveXBoxProfile;
 		this.customAzureApplication = customAzureApplication;
 		this.timeoutValues = timeoutValues;
 		
 		user = Optional.empty();
+		xBoxProfile = Optional.empty();
 	}
 	
 	/**
@@ -310,29 +327,36 @@ public class Authenticator {
 		
 		// Authentication
 		if (authenticate) {
-			final LoginResponse<? extends AuthenticationException> loginResponse;
-			
 			// Microsoft authentication
 			if (resultFile instanceof final MicrosoftAuthenticationFile microsoftFile) {
-				final MicrosoftLoginResponse response = MicrosoftAuthentication.authenticate(customAzureApplication, microsoftFile, timeoutValues);
+				final MicrosoftLoginResponse response = MicrosoftAuthentication.authenticate(customAzureApplication, retrieveXBoxProfile, microsoftFile, timeoutValues);
 				
+				// Set new result file
 				if (response.hasRefreshToken()) {
 					resultFile = new MicrosoftAuthenticationFile(microsoftFile.getClientId(), response.getRefreshToken().get());
 				}
 				
-				loginResponse = response;
+				// Throw exceptions
+				if (response.hasException()) {
+					throw response.getException().get();
+				}
+				
+				// Validate authentication response
+				if (!response.hasUser()) {
+					throw new AuthenticationException("After login there should be a user");
+				}
+				user = response.getUser();
+				
+				// Validate xbox profile response
+				if (retrieveXBoxProfile && !response.hasXBoxProfile()) {
+					throw new AuthenticationException("XBox profile was requested but is not there");
+				}
+				if (response.hasXBoxProfile()) {
+					xBoxProfile = response.getXBoxProfile();
+				}
 			} else {
 				throw new AuthenticationException(resultFile + " is not a microsoft authentication file");
 			}
-			
-			// Validate authentication response
-			if (loginResponse.hasException()) {
-				throw loginResponse.getException().get();
-			}
-			if (!loginResponse.hasUser()) {
-				throw new AuthenticationException("After login there should be a user");
-			}
-			user = loginResponse.getUser();
 		}
 	}
 	
@@ -347,7 +371,7 @@ public class Authenticator {
 	 */
 	public AuthenticationFile getResultFile() {
 		if (!hasRun) {
-			throw new IllegalStateException("This method can only be called when the authentication was run");
+			throw new IllegalStateException("This method can only be called after the authentication was run");
 		}
 		return resultFile;
 	}
@@ -358,13 +382,30 @@ public class Authenticator {
 	 * Can only be called after {@link #run()} was called.
 	 * </p>
 	 *
-	 * @return Cannot be empty if authentication was requested and no {@link AuthenticationException} was raised.
+	 * @return Minecraft User. Cannot be empty if authentication was requested and no {@link AuthenticationException} was
+	 *         raised
 	 */
 	public Optional<User> getUser() {
 		if (!hasRun) {
-			throw new IllegalStateException("This method can only be called when the authentication was run");
+			throw new IllegalStateException("This method can only be called after the authentication was run");
 		}
 		return user;
+	}
+	
+	/**
+	 * Returns the XBox profile if authentication and the xbox profile was requested and no errors occurred.
+	 * <p>
+	 * Can only be called after {@link #run()} was called.
+	 * </p>
+	 * 
+	 * @return XBoxProfile. Cannot be empty if authentication and the xbox profile was requested and no
+	 *         {@link AuthenticationException} was raised
+	 */
+	public Optional<XBoxProfile> getXBoxProfile() {
+		if (!hasRun) {
+			throw new IllegalStateException("This method can only be called after the authentication was run");
+		}
+		return xBoxProfile;
 	}
 	
 	/**

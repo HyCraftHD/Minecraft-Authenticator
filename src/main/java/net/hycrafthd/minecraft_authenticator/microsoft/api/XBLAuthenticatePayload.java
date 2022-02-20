@@ -31,7 +31,7 @@ public class XBLAuthenticatePayload {
 	
 	@Override
 	public String toString() {
-		return "XBoxLiveAuthenticatePayload [properties=" + properties + ", relyingParty=" + relyingParty + ", tokenType=" + tokenType + "]";
+		return "XBLAuthenticatePayload [properties=" + properties + ", relyingParty=" + relyingParty + ", tokenType=" + tokenType + "]";
 	}
 	
 	public static class Properties {

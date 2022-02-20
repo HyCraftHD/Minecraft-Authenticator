@@ -31,14 +31,14 @@ public class MicrosoftAuthentication {
 		return new MicrosoftAuthenticationFile(UUID.randomUUID(), response.getRefreshToken());
 	}
 	
-	public static MicrosoftLoginResponse authenticate(Optional<AzureApplication> customAzureApplication, MicrosoftAuthenticationFile file, TimeoutValues timeoutValues) {
+	public static MicrosoftLoginResponse authenticate(Optional<AzureApplication> customAzureApplication, boolean retrieveXBoxProfile, MicrosoftAuthenticationFile file, TimeoutValues timeoutValues) {
 		if (customAzureApplication.isPresent()) {
 			final AzureApplication azureApplication = customAzureApplication.get();
 			final String clientId = azureApplication.clientId();
 			final String redirectUrl = azureApplication.redirectUrl();
-			return MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, file.getRefreshToken(), file.getClientId(), timeoutValues);
+			return MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues);
 		} else {
-			return MicrosoftLoginRoutine.loginWithRefreshToken(file.getRefreshToken(), file.getClientId(), timeoutValues);
+			return MicrosoftLoginRoutine.loginWithRefreshToken(retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues);
 		}
 	}
 	

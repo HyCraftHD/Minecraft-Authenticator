@@ -30,6 +30,7 @@ public class OAuthErrorResponse {
 	
 	@Override
 	public String toString() {
-		return "OAuthError [error=" + error + ", errorDescription=" + errorDescription + ", correlationId=" + correlationId + "]";
+		return "OAuthErrorResponse [error=" + error + ", errorDescription=" + errorDescription + ", correlationId=" + correlationId + "]";
 	}
+	
 }

@@ -6,4 +6,9 @@ public class XSTSAuthorizeResponse extends XBoxResponse {
 		super(issueInstant, notAfter, token, displayClaims);
 	}
 	
+	@Override
+	public String toString() {
+		return "XSTSAuthorizeResponse [toString()=" + super.toString() + "]";
+	}
+	
 }

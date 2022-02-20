@@ -20,6 +20,7 @@ import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticatePayload;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBLAuthenticateResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XBoxProfileResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XBoxResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizeErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.XSTSAuthorizePayload;
@@ -228,23 +229,29 @@ public class MicrosoftService {
 		}
 	}
 	
-	public static MicrosoftResponse<JsonElement, Integer> xboxProfile(String xstsToken, XBoxResponse.DisplayClaims displayClaims, TimeoutValues timeoutValues) {
+	public static MicrosoftResponse<XBoxProfileResponse, Integer> xboxProfileSettings(String xstsToken, XBoxResponse.DisplayClaims displayClaims, TimeoutValues timeoutValues) {
+		final String authorization = "XBL3.0 x=" + displayClaims.getXui().get(0).getUhs() + ";" + xstsToken;
+		
 		final JsonElement responseElement;
 		try {
 			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBOX_PROFILE_SETTINGS_URL, Parameters.create().add("settings", "GameDisplayName,AppDisplayName,AppDisplayPicRaw,GameDisplayPicRaw,PublicGamerpic,ShowUserAsAvatar,Gamerscore,Gamertag,ModernGamertag,ModernGamertagSuffix,UniqueModernGamertag,AccountTier,TenureLevel,XboxOneRep,PreferredColor,Location,Bio,Watermarks,RealName,RealNameOverride,IsQuarantined"));
-			System.out.println(url); // TODO cleanup
-			final HttpResponse response = ConnectionUtil.authorizationJsonGetRequest(url, "XBL3.0 x=" + displayClaims.getXui().get(0).getUhs() + ";" + xstsToken, urlConnection -> {
+			final HttpResponse response = ConnectionUtil.authorizationJsonGetRequest(url, authorization, urlConnection -> {
 				urlConnection.addRequestProperty("x-xbl-contract-version", "3");
 			}, timeoutValues);
-			// if (response.getResponseCode() >= 400) {
-			// return MicrosoftResponse.ofError(response.getResponseCode());
-			// }
+			if (response.getResponseCode() >= 400) {
+				return MicrosoftResponse.ofError(response.getResponseCode());
+			}
 			responseElement = JsonParser.parseString(response.getAsString());
 		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
-		return MicrosoftResponse.ofResponse(responseElement);
+		try {
+			final XBoxProfileResponse response = Constants.GSON.fromJson(responseElement, XBoxProfileResponse.class);
+			return MicrosoftResponse.ofResponse(response);
+		} catch (final Exception ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
 	}
 	
 }

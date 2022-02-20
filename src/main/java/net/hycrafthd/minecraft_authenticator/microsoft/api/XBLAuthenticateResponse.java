@@ -6,4 +6,9 @@ public class XBLAuthenticateResponse extends XBoxResponse {
 		super(issueInstant, notAfter, token, displayClaims);
 	}
 	
+	@Override
+	public String toString() {
+		return "XBLAuthenticateResponse [toString()=" + super.toString() + "]";
+	}
+	
 }

@@ -57,7 +57,7 @@ public class OAuthTokenResponse {
 	
 	@Override
 	public String toString() {
-		return "AuthorizationTokenResponse [tokenType=" + tokenType + ", expiredIn=" + expiredIn + ", scope=" + scope + ", accessToken=" + accessToken + ", refreshToken=" + refreshToken + ", userId=" + userId + ", foci=" + foci + "]";
+		return "OAuthTokenResponse [tokenType=" + tokenType + ", expiredIn=" + expiredIn + ", scope=" + scope + ", accessToken=" + accessToken + ", refreshToken=" + refreshToken + ", userId=" + userId + ", foci=" + foci + "]";
 	}
 	
 }

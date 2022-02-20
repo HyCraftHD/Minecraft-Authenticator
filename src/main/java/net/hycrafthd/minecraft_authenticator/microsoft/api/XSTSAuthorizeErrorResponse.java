@@ -5,13 +5,13 @@ import com.google.gson.annotations.SerializedName;
 public class XSTSAuthorizeErrorResponse {
 	
 	@SerializedName("Identity")
-	private String identity;
+	private final String identity;
 	@SerializedName("XErr")
-	private long xErr;
+	private final long xErr;
 	@SerializedName("Message")
-	private String message;
+	private final String message;
 	@SerializedName("Redirect")
-	private String redirect;
+	private final String redirect;
 	
 	public XSTSAuthorizeErrorResponse(String identity, long xErr, String message, String redirect) {
 		this.identity = identity;
@@ -24,32 +24,16 @@ public class XSTSAuthorizeErrorResponse {
 		return identity;
 	}
 	
-	public void setIdentity(String identity) {
-		this.identity = identity;
-	}
-	
 	public long getxErr() {
 		return xErr;
-	}
-	
-	public void setxErr(long xErr) {
-		this.xErr = xErr;
 	}
 	
 	public String getMessage() {
 		return message;
 	}
 	
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	
 	public String getRedirect() {
 		return redirect;
-	}
-	
-	public void setRedirect(String redirect) {
-		this.redirect = redirect;
 	}
 	
 	@Override

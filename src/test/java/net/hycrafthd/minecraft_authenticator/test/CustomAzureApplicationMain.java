@@ -9,6 +9,7 @@ import java.net.Socket;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationException;
 import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.login.User;
+import net.hycrafthd.minecraft_authenticator.login.XBoxProfile;
 
 public class CustomAzureApplicationMain {
 	
@@ -38,6 +39,7 @@ public class CustomAzureApplicationMain {
 					.serviceConnectTimeout(5000) //
 					.serviceReadTimeout(10000) //
 					.shouldAuthenticate() //
+					.shouldRetrieveXBoxProfile() //
 					.build();
 			
 			try {
@@ -50,6 +52,9 @@ public class CustomAzureApplicationMain {
 			
 			final User user = authenticator.getUser().get();
 			System.out.println(user);
+			
+			final XBoxProfile xBoxProfile = authenticator.getXBoxProfile().get();
+			System.out.println(xBoxProfile);
 		}
 	}
 }
