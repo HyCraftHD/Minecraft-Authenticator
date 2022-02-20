@@ -291,9 +291,9 @@ public class Authenticator {
 					final Entry<String, String> entry = customAzureApplication.get();
 					final String clientId = entry.getKey();
 					final String redirectUrl = entry.getValue();
-					response = MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, microsoftFile.getRefreshToken(), timeoutValues);
+					response = MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, microsoftFile.getRefreshToken(), microsoftFile.getClientId(), timeoutValues);
 				} else {
-					response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken(), timeoutValues);
+					response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken(), microsoftFile.getClientId(), timeoutValues);
 				}
 				
 				if (response.hasRefreshToken()) {

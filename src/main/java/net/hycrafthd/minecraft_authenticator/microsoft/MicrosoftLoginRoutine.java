@@ -1,6 +1,10 @@
 package net.hycrafthd.minecraft_authenticator.microsoft;
 
 import java.util.Optional;
+import java.util.UUID;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.login.User;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
@@ -12,23 +16,23 @@ import net.hycrafthd.minecraft_authenticator.util.ParseUtil;
 
 public class MicrosoftLoginRoutine {
 	
-	public static MicrosoftLoginResponse loginWithAuthCode(String authCode, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromCode(authCode, timeoutValues), timeoutValues);
+	public static MicrosoftLoginResponse loginWithAuthCode(String authCode, UUID launcherClientId, TimeoutValues timeoutValues) {
+		return login(MicrosoftService.oAuthTokenFromCode(authCode, timeoutValues), launcherClientId, timeoutValues);
 	}
 	
-	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, String authCode, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authCode, timeoutValues), timeoutValues);
+	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, String authCode, UUID launcherClientId, TimeoutValues timeoutValues) {
+		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authCode, timeoutValues), launcherClientId, timeoutValues);
 	}
 	
-	public static MicrosoftLoginResponse loginWithRefreshToken(String refreshToken, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken, timeoutValues), timeoutValues);
+	public static MicrosoftLoginResponse loginWithRefreshToken(String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken, timeoutValues), launcherClientId, timeoutValues);
 	}
 	
-	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String refreshToken, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, refreshToken, timeoutValues), timeoutValues);
+	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, refreshToken, timeoutValues), launcherClientId, timeoutValues);
 	}
 	
-	private static MicrosoftLoginResponse login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse, TimeoutValues timeoutValues) {
+	private static MicrosoftLoginResponse login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse, UUID launcherClientId, TimeoutValues timeoutValues) {
 		if (oAuthResponse.hasException()) {
 			return exception("Cannot get oAuth token", oAuthResponse.getException().get(), Optional.empty());
 		} else if (oAuthResponse.hasErrorResponse()) {
@@ -93,14 +97,20 @@ public class MicrosoftLoginRoutine {
 		MicrosoftService.xboxProfile(xBoxXsts.getToken(), xBoxXsts.getDisplayClaims(), timeoutValues);
 		
 		// Parse minecraft access token and extract xuid
+		final String xuid;
 		try {
 			final String jwt = ParseUtil.decodeJWT(minecraftLogin.getAccessToken());
-			System.out.println(jwt);
+			final JsonObject payload = JsonParser.parseString(jwt).getAsJsonObject();
+			
+			xuid = payload.get("xuid").getAsString();
 		} catch (final Exception ex) {
 			return exception("Could not parse minecraft access token", oAuth);
 		}
 		
-		return MicrosoftLoginResponse.ofSuccess(new User(minecraftProfile.getId(), minecraftProfile.getName(), minecraftLogin.getAccessToken(), "msa"), oAuth.getRefreshToken());
+		// Encode client id
+		final String clientId = ParseUtil.encodeBase64(launcherClientId.toString());
+		
+		return MicrosoftLoginResponse.ofSuccess(new User(minecraftProfile.getId(), minecraftProfile.getName(), minecraftLogin.getAccessToken(), "msa", xuid, clientId), oAuth.getRefreshToken());
 	}
 	
 	// Helper methods
