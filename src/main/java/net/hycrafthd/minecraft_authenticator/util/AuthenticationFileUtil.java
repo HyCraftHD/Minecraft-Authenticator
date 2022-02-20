@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -19,36 +16,10 @@ import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile;
-import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationException;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFileSerializer;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
-import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 
 public class AuthenticationFileUtil {
-	
-	public static MicrosoftAuthenticationFile createMicrosoftAuthenticationFile(Optional<Entry<String, String>> customAzureApplication, String authorizationCode, TimeoutValues timeoutValues) throws MicrosoftAuthenticationException {
-		final MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> microsoftResponse;
-		if (customAzureApplication.isPresent()) {
-			final Entry<String, String> entry = customAzureApplication.get();
-			final String clientId = entry.getKey();
-			final String redirectUrl = entry.getValue();
-			microsoftResponse = MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authorizationCode, timeoutValues);
-		} else {
-			microsoftResponse = MicrosoftService.oAuthTokenFromCode(authorizationCode, timeoutValues);
-		}
-		
-		if (microsoftResponse.hasException()) {
-			throw new MicrosoftAuthenticationException("Cannot get oAuth token", microsoftResponse.getException().get());
-		} else if (microsoftResponse.hasErrorResponse()) {
-			throw new MicrosoftAuthenticationException("Cannot get oAuth token because: " + microsoftResponse.getErrorResponse().get());
-		}
-		final OAuthTokenResponse response = microsoftResponse.getResponse().get();
-		return new MicrosoftAuthenticationFile(UUID.randomUUID(), response.getRefreshToken());
-	}
 	
 	// File save and read methods
 	

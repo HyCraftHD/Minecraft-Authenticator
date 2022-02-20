@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
@@ -83,7 +84,7 @@ public class MicrosoftService {
 			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_TOKEN);
 			final String responseString = ConnectionUtil.urlEncodedPostRequest(url, ConnectionUtil.JSON_CONTENT_TYPE, parameters, timeoutValues).getAsString();
 			responseElement = JsonParser.parseString(responseString);
-		} catch (final IOException ex) {
+		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -109,7 +110,7 @@ public class MicrosoftService {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
 			responseElement = JsonParser.parseString(response.getAsString());
-		} catch (final IOException ex) {
+		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -135,7 +136,7 @@ public class MicrosoftService {
 			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XSTS_AUTHORIZE_URL);
 			final String responseString = ConnectionUtil.jsonPostRequest(url, HttpPayload.fromGson(payload), timeoutValues).getAsString();
 			responseElement = JsonParser.parseString(responseString);
-		} catch (final IOException ex) {
+		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -172,7 +173,7 @@ public class MicrosoftService {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
 			responseElement = JsonParser.parseString(response.getAsString());
-		} catch (final IOException ex) {
+		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -192,7 +193,7 @@ public class MicrosoftService {
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
-		} catch (final IOException ex) {
+		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -208,7 +209,7 @@ public class MicrosoftService {
 			if (response.getResponseCode() >= 300) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
-		} catch (final IOException ex) {
+		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
@@ -228,7 +229,7 @@ public class MicrosoftService {
 			// return MicrosoftResponse.ofError(response.getResponseCode());
 			// }
 			responseElement = JsonParser.parseString(response.getAsString());
-		} catch (final IOException ex) {
+		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		

@@ -2,16 +2,14 @@ package net.hycrafthd.minecraft_authenticator.login;
 
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
+import net.hycrafthd.minecraft_authenticator.microsoft.AzureApplication;
+import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthentication;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftAuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginResponse;
-import net.hycrafthd.minecraft_authenticator.microsoft.MicrosoftLoginRoutine;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
-import net.hycrafthd.minecraft_authenticator.util.AuthenticationFileUtil;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 
 /**
@@ -125,7 +123,7 @@ public class Authenticator {
 	 * @return A {@link Builder} to configure the authenticator
 	 */
 	public static Builder ofMicrosoft(String authorizationCode) {
-		return new Builder((customAzureApplication, timeoutValues) -> AuthenticationFileUtil.createMicrosoftAuthenticationFile(customAzureApplication, authorizationCode, timeoutValues));
+		return new Builder((customAzureApplication, timeoutValues) -> MicrosoftAuthentication.createAuthenticationFile(customAzureApplication, authorizationCode, timeoutValues));
 	}
 	
 	/**
@@ -172,7 +170,7 @@ public class Authenticator {
 		
 		private final AuthenticationFileFunctionWithCustomAzureApplication fileFunction;
 		private boolean authenticate;
-		private Optional<Entry<String, String>> customAzureApplication;
+		private Optional<AzureApplication> customAzureApplication;
 		private int serviceConnectTimeout;
 		private int serviceReadTimeout;
 		
@@ -218,7 +216,7 @@ public class Authenticator {
 		 * @return This builder
 		 */
 		public Builder customAzureApplication(String clientId, String redirectUrl) {
-			customAzureApplication = Optional.of(new SimpleImmutableEntry<>(clientId, redirectUrl));
+			customAzureApplication = Optional.of(new AzureApplication(clientId, redirectUrl));
 			return this;
 		}
 		
@@ -247,54 +245,76 @@ public class Authenticator {
 		}
 		
 		/**
-		 * This runs the tasks that were selected. If {@link #shouldAuthenticate()} is not enabled it will only resolve the
-		 * {@link AuthenticationFile}. This call is blocking and can take some time if the services take a long respond time.
-		 * The default timeout time is 15 seconds per service request. Change the timeout for the services with
-		 * {@link #serviceConnectTimeout(int)} and {@link #serviceReadTimeout(int)}
-		 *
-		 * @return The authenticator object with the results
-		 * @throws AuthenticationException Throws exception if login was not successful
+		 * Creates a new {@link Authenticator} with this configuration. To run the authenticator call
+		 * {@link Authenticator#run()}.
+		 * 
+		 * @return Build Authenticator object
 		 */
-		public Authenticator run() throws AuthenticationException {
+		public Authenticator build() {
 			return new Authenticator(fileFunction, authenticate, customAzureApplication, new TimeoutValues(serviceConnectTimeout, serviceReadTimeout));
 		}
 		
 	}
 	
-	private final AuthenticationFile resultFile;
-	private final Optional<User> user;
+	private final AuthenticationFileFunctionWithCustomAzureApplication fileFunction;
+	private final boolean authenticate;
+	private final Optional<AzureApplication> customAzureApplication;
+	private final TimeoutValues timeoutValues;
+	
+	private boolean hasRun;
+	
+	private AuthenticationFile resultFile;
+	private Optional<User> user;
 	
 	/**
-	 * Internal constructor that runs the authentication
+	 * Internal constructor to setup the authenticator state. To execute the authentication run the {@link #run()} method.
 	 *
 	 * @param fileFunction Function that returns {@link AuthenticationFile} for authentication
 	 * @param authenticate Should authenticate to get a {@link User} as a result
 	 * @param customAzureApplication Optional value to pass custom azure application values
 	 * @param timeoutValues Timeout values for a service connection
-	 * @throws AuthenticationException Throws exception if authentication was not successful
 	 */
-	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, Optional<Entry<String, String>> customAzureApplication, TimeoutValues timeoutValues) throws AuthenticationException {
-		final AuthenticationFile file = fileFunction.get(customAzureApplication, timeoutValues);
+	protected Authenticator(AuthenticationFileFunctionWithCustomAzureApplication fileFunction, boolean authenticate, Optional<AzureApplication> customAzureApplication, TimeoutValues timeoutValues) {
+		this.fileFunction = fileFunction;
+		this.authenticate = authenticate;
+		this.customAzureApplication = customAzureApplication;
+		this.timeoutValues = timeoutValues;
 		
-		AuthenticationFile resultFile = file;
-		Optional<User> user = Optional.empty();
+		user = Optional.empty();
+	}
+	
+	/**
+	 * This runs the selected authentication tasks. If {@link Builder#shouldAuthenticate()} is not enabled it will only
+	 * resolve the {@link AuthenticationFile}. This call is blocking and can take some time if the services take a long
+	 * respond time. The default timeout time is 15 seconds per service request. Change the timeout for the services with
+	 * {@link Builder##serviceConnectTimeout(int)} and {@link Builder##serviceReadTimeout(int)}.
+	 * <p>
+	 * Please always save the {@link #getResultFile()} if it is not null, even when {@link AuthenticationException} is
+	 * thrown. This is important because when a service after the initial authentication fails the oAuth service still
+	 * requires the updated tokens.
+	 * </p>
+	 * <p>
+	 * This method can only be called once per {@link Authenticator} object.
+	 * </p>
+	 * 
+	 * @throws AuthenticationException Throws exception if login was not successful
+	 */
+	public void run() throws AuthenticationException {
+		if (hasRun) {
+			throw new IllegalStateException("Cannot run the authentication multiple times");
+		}
+		hasRun = true;
 		
-		// Authenticate with microsoft or yggdrasil
+		// Resolve the initial file
+		resultFile = fileFunction.get(customAzureApplication, timeoutValues);
+		
+		// Authentication
 		if (authenticate) {
 			final LoginResponse<? extends AuthenticationException> loginResponse;
 			
-			if (file instanceof final MicrosoftAuthenticationFile microsoftFile) {
-				// Microsoft authentication
-				
-				final MicrosoftLoginResponse response;
-				if (customAzureApplication.isPresent()) {
-					final Entry<String, String> entry = customAzureApplication.get();
-					final String clientId = entry.getKey();
-					final String redirectUrl = entry.getValue();
-					response = MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, microsoftFile.getRefreshToken(), microsoftFile.getClientId(), timeoutValues);
-				} else {
-					response = MicrosoftLoginRoutine.loginWithRefreshToken(microsoftFile.getRefreshToken(), microsoftFile.getClientId(), timeoutValues);
-				}
+			// Microsoft authentication
+			if (resultFile instanceof final MicrosoftAuthenticationFile microsoftFile) {
+				final MicrosoftLoginResponse response = MicrosoftAuthentication.authenticate(customAzureApplication, microsoftFile, timeoutValues);
 				
 				if (response.hasRefreshToken()) {
 					resultFile = new MicrosoftAuthenticationFile(microsoftFile.getClientId(), response.getRefreshToken().get());
@@ -302,7 +322,7 @@ public class Authenticator {
 				
 				loginResponse = response;
 			} else {
-				throw new AuthenticationException(file + " is not a microsoft authentication file");
+				throw new AuthenticationException(resultFile + " is not a microsoft authentication file");
 			}
 			
 			// Validate authentication response
@@ -314,26 +334,36 @@ public class Authenticator {
 			}
 			user = loginResponse.getUser();
 		}
-		
-		this.resultFile = resultFile;
-		this.user = user;
 	}
 	
 	/**
-	 * Returns the updated {@link AuthenticationFile} if authentication was requested. Else returns the initial object.
+	 * Returns the updated {@link AuthenticationFile} if authentication was requested. Else returns the initial object. If
+	 * the initial authentication fails this value might be <strong>null</strong>.
+	 * <p>
+	 * Can only be called after {@link #run()} was called.
+	 * </p>
 	 *
-	 * @return {@link AuthenticationFile} that should be used for the next authentication.
+	 * @return {@link AuthenticationFile} that should be used for the next authentication or null
 	 */
 	public AuthenticationFile getResultFile() {
+		if (!hasRun) {
+			throw new IllegalStateException("This method can only be called when the authentication was run");
+		}
 		return resultFile;
 	}
 	
 	/**
-	 * Returns the user if authentication was requested and no error occured.
+	 * Returns the user if authentication was requested and no errors occurred.
+	 * <p>
+	 * Can only be called after {@link #run()} was called.
+	 * </p>
 	 *
-	 * @return Should not be empty if authentication was requested and not {@link AuthenticationException} was raised.
+	 * @return Cannot be empty if authentication was requested and no {@link AuthenticationException} was raised.
 	 */
 	public Optional<User> getUser() {
+		if (!hasRun) {
+			throw new IllegalStateException("This method can only be called when the authentication was run");
+		}
 		return user;
 	}
 	
@@ -369,7 +399,6 @@ public class Authenticator {
 		 * @return {@link AuthenticationFile}
 		 * @throws AuthenticationException Throws if authentication file is created with an online service with authentication
 		 */
-		AuthenticationFile get(Optional<Entry<String, String>> customAzureApplication, TimeoutValues timeoutValues) throws AuthenticationException;
+		AuthenticationFile get(Optional<AzureApplication> customAzureApplication, TimeoutValues timeoutValues) throws AuthenticationException;
 	}
-	
 }
