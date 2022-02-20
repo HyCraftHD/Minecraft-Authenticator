@@ -2,14 +2,17 @@ package net.hycrafthd.minecraft_authenticator.microsoft;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.hycrafthd.minecraft_authenticator.login.User;
 import net.hycrafthd.minecraft_authenticator.login.XBoxProfile;
+import net.hycrafthd.minecraft_authenticator.login.XBoxProfile.XBoxProfileSettings;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
+import net.hycrafthd.minecraft_authenticator.microsoft.api.XBoxProfileResponse.Profile;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftService;
 import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
@@ -128,10 +131,9 @@ public class MicrosoftLoginRoutine {
 				return exception("Cannot get xbox profile data because the service returned http code " + xBoxProfileSettingsResponse.getErrorResponse().get(), oAuth);
 			}
 			final var xBoxProfileSettings = successResponse(xBoxProfileSettingsResponse);
+			final Profile profile = xBoxProfileSettings.getProfileUsers().get(0);
 			
-			System.out.println(xBoxProfileSettings);
-			
-			xBoxProfile = Optional.empty();
+			xBoxProfile = Optional.of(new XBoxProfile(profile.getId(), profile.getSettings().stream().map(setting -> new XBoxProfileSettings(setting.getId(), setting.getValue())).collect(Collectors.toUnmodifiableList()), profile.isSponsoredUser()));
 		} else {
 			xBoxProfile = Optional.empty();
 		}

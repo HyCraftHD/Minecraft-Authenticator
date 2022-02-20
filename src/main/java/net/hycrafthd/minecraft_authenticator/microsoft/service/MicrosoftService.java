@@ -234,7 +234,7 @@ public class MicrosoftService {
 		
 		final JsonElement responseElement;
 		try {
-			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBOX_PROFILE_SETTINGS_URL, Parameters.create().add("settings", "GameDisplayName,AppDisplayName,AppDisplayPicRaw,GameDisplayPicRaw,PublicGamerpic,ShowUserAsAvatar,Gamerscore,Gamertag,ModernGamertag,ModernGamertagSuffix,UniqueModernGamertag,AccountTier,TenureLevel,XboxOneRep,PreferredColor,Location,Bio,Watermarks,RealName,RealNameOverride,IsQuarantined"));
+			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_XBOX_PROFILE_SETTINGS_URL, Parameters.create().add("settings", "GameDisplayName,AppDisplayName,AppDisplayPicRaw,GameDisplayPicRaw,PublicGamerpic,Gamerscore,Gamertag,ModernGamertag,ModernGamertagSuffix,UniqueModernGamertag,AccountTier,XboxOneRep,Location,Bio,Watermarks,RealName,RealNameOverride,IsQuarantined"));
 			final HttpResponse response = ConnectionUtil.authorizationJsonGetRequest(url, authorization, urlConnection -> {
 				urlConnection.addRequestProperty("x-xbl-contract-version", "3");
 			}, timeoutValues);
