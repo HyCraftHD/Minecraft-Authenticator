@@ -22,7 +22,7 @@ public class Constants {
 	
 	public static final String MICROSOFT_MINECRAFT_SERVICE = "https://api.minecraftservices.com";
 	public static final String MICROSOFT_MINECRAFT_ENDPOINT_LAUNCHER_LOGIN = "launcher/login";
-	public static final String MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED = "entitlements/mcstore";
+	public static final String MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED = "entitlements/license";
 	public static final String MICROSOFT_MINECRAFT_ENDPOINT_PROFILE = "minecraft/profile";
 	
 	public static final String MICROSOFT_XBOX_PROFILE_SETTINGS_URL = "https://profile.xboxlive.com/users/me/profile/settings";

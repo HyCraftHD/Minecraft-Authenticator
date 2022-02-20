@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.UUID;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -185,20 +186,25 @@ public class MicrosoftService {
 		}
 	}
 	
-	public static MicrosoftResponse<MinecraftHasPurchasedResponse, Integer> minecraftHasPurchased(String accessToken, TimeoutValues timeoutValues) {
-		final String responseString;
+	public static MicrosoftResponse<MinecraftHasPurchasedResponse, Integer> minecraftHasPurchased(String accessToken, UUID launcherClientId, TimeoutValues timeoutValues) {
+		final JsonElement responseElement;
 		try {
-			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED), accessToken, timeoutValues);
-			responseString = response.getAsString();
-			if (response.getResponseCode() >= 300) {
+			final URL url = ConnectionUtil.urlBuilder(Constants.MICROSOFT_MINECRAFT_SERVICE, Constants.MICROSOFT_MINECRAFT_ENDPOINT_HAS_PURCHASED, Parameters.create().add("requestId", launcherClientId));
+			final HttpResponse response = ConnectionUtil.bearerAuthorizationJsonGetRequest(url, accessToken, timeoutValues);
+			if (response.getResponseCode() >= 400) {
 				return MicrosoftResponse.ofError(response.getResponseCode());
 			}
+			responseElement = JsonParser.parseString(response.getAsString());
 		} catch (final IOException | JsonParseException ex) {
 			return MicrosoftResponse.ofException(ex);
 		}
 		
-		final MinecraftHasPurchasedResponse response = Constants.GSON.fromJson(responseString, MinecraftHasPurchasedResponse.class);
-		return MicrosoftResponse.ofResponse(response);
+		try {
+			final MinecraftHasPurchasedResponse response = Constants.GSON.fromJson(responseElement, MinecraftHasPurchasedResponse.class);
+			return MicrosoftResponse.ofResponse(response);
+		} catch (final Exception ex) {
+			return MicrosoftResponse.ofException(ex);
+		}
 	}
 	
 	public static MicrosoftResponse<MinecraftProfileResponse, Integer> minecraftProfile(String accessToken, TimeoutValues timeoutValues) {

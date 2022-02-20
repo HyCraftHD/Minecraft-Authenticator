@@ -72,7 +72,7 @@ public class MicrosoftLoginRoutine {
 		}
 		final var minecraftLogin = successResponse(minecraftLoginResponse);
 		
-		final var minecraftHasPurchasedResponse = MicrosoftService.minecraftHasPurchased(minecraftLogin.getAccessToken(), timeoutValues);
+		final var minecraftHasPurchasedResponse = MicrosoftService.minecraftHasPurchased(minecraftLogin.getAccessToken(), launcherClientId, timeoutValues);
 		if (minecraftHasPurchasedResponse.hasException()) {
 			return exception("Cannot get purchase data for minecraft", minecraftHasPurchasedResponse.getException().get(), oAuth);
 		} else if (minecraftHasPurchasedResponse.hasErrorResponse()) {
