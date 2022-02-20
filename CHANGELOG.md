@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2022-02-20
+### Changed
+ - Rewritten most parts of the library
+ - Removed yggdrasil authentication as it will be shut down
+
+### Added
+ - Added xuid and clientId to the user object
+ - Added option to retrieve xbox profile settings
+
 ## [2.0.1] - 2022-01-28
 ### Changed
  - Removed guava dependency (replaced url encoders with jdk ones)
