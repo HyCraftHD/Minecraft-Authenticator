@@ -79,6 +79,16 @@ task runInteractiveFileCreator(type: JavaExec) {
 	workingDir run
 }
 
+task runMinecraftLauncherApplication(type: JavaExec) {
+	def run = new File("${rootDir}/run")
+	if(!run.exists()) {
+		run.mkdirs()
+	}
+	
+	main "net.hycrafthd.minecraft_authenticator.test.MinecraftLauncherApplicationMain"
+	workingDir run
+}
+
 task runCustomAzureApplication(type: JavaExec) {
 	def run = new File("${rootDir}/run")
 	if(!run.exists()) {
@@ -90,7 +100,7 @@ task runCustomAzureApplication(type: JavaExec) {
 }
 
 launchConfig {
-	includedTasks "runInteractiveFileCreator", "runCustomAzureApplication"
+	includedTasks "runMinecraftLauncherApplication", "runCustomAzureApplication"
 }
 
 tasks.withType(PublishToMavenRepository) {
