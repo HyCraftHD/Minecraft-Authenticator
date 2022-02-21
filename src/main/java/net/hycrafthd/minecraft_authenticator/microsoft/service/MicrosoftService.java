@@ -36,13 +36,21 @@ public class MicrosoftService {
 	public static URL oAuthLoginUrl() {
 		return oAuthLoginUrl(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL);
 	}
-	
+
 	public static URL oAuthLoginUrl(String clientId, String redirectUrl) {
-		final Parameters parameters = Parameters.create() //
-				.add("client_id", clientId) //
-				.add("response_type", "code") //
-				.add("scope", "XboxLive.signin offline_access") //
+		return oAuthLoginUrl(clientId, redirectUrl);
+	}
+
+	public static URL oAuthLoginUrl(String clientId, String redirectUrl, String clientSecret) {
+		final Parameters parameters = Parameters.create()
+				.add("client_id", clientId)
+				.add("response_type", "code")
+				.add("scope", "XboxLive.signin offline_access")
 				.add("redirect_uri", redirectUrl);
+
+		if (clientSecret != null) {
+			parameters.add("client_secret", clientSecret);
+		}
 		
 		try {
 			return ConnectionUtil.urlBuilder(Constants.MICROSOFT_OAUTH_SERVICE, Constants.MICROSOFT_OAUTH_ENDPOINT_AUTHORIZE, parameters);
@@ -54,13 +62,21 @@ public class MicrosoftService {
 	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String authorizationCode, TimeoutValues timeoutValues) {
 		return oAuthTokenFromCode(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, authorizationCode, timeoutValues);
 	}
-	
+
 	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String clientId, String redirectUrl, String authorizationCode, TimeoutValues timeoutValues) {
+		return oAuthTokenFromCode(clientId, redirectUrl, null, authorizationCode, timeoutValues);
+	}
+
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromCode(String clientId, String redirectUrl, String clientSecret, String authorizationCode, TimeoutValues timeoutValues) {
 		final Parameters parameters = Parameters.create() //
 				.add("client_id", clientId) //
 				.add("code", authorizationCode) //
 				.add("grant_type", "authorization_code") //
 				.add("redirect_uri", redirectUrl);
+
+		if (clientSecret != null) {
+			parameters.add("client_secret", clientSecret);
+		}
 		
 		return oAuthServiceRequest(parameters, timeoutValues);
 	}
@@ -68,13 +84,21 @@ public class MicrosoftService {
 	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String refreshToken, TimeoutValues timeoutValues) {
 		return oAuthTokenFromRefreshToken(Constants.MICROSOFT_CLIENT_ID, Constants.MICROSOFT_OAUTH_REDIRECT_URL, refreshToken, timeoutValues);
 	}
-	
+
 	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String clientId, String redirectUrl, String refreshToken, TimeoutValues timeoutValues) {
+		return oAuthTokenFromRefreshToken(clientId, redirectUrl, null, refreshToken, timeoutValues);
+	}
+
+	public static MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthTokenFromRefreshToken(String clientId, String redirectUrl, String clientSecret, String refreshToken, TimeoutValues timeoutValues) {
 		final Parameters parameters = Parameters.create() //
 				.add("client_id", clientId) //
 				.add("refresh_token", refreshToken) //
 				.add("grant_type", "refresh_token") //
 				.add("redirect_uri", redirectUrl);
+
+		if (clientSecret != null) {
+			parameters.add("client_secret", clientSecret);
+		}
 		
 		return oAuthServiceRequest(parameters, timeoutValues);
 		

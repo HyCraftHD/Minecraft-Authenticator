@@ -31,7 +31,12 @@ public class MicrosoftLoginRoutine {
 	public static MicrosoftLoginResponse loginWithRefreshToken(boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
 		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
 	}
-	
+
+	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, clientSecret, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+
+	}
+
 	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
 		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
 	}
