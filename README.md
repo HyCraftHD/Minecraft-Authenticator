@@ -8,7 +8,7 @@ This library also allows for storage of the authentication data and therefore se
 # Building
 
 To build just run ``./gradlew build``. You will find the jars in the build/libs directory.
-This project requires gson as dependency and requires java 17.
+This project requires gson and java 17 as dependency.
 
 # Include in your own project
 
