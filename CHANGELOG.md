@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [3.0.0] - 2022-02-20
 ### Changed
  - Rewritten most parts of the library
+ - Fixed bug that you can lose the refresh token when an error occurred
  - Removed yggdrasil authentication as it will be shut down
 
 ### Added
