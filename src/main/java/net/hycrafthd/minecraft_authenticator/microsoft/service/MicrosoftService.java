@@ -38,7 +38,7 @@ public class MicrosoftService {
 	}
 
 	public static URL oAuthLoginUrl(String clientId, String redirectUrl) {
-		return oAuthLoginUrl(clientId, redirectUrl);
+		return oAuthLoginUrl(clientId, redirectUrl, null);
 	}
 
 	public static URL oAuthLoginUrl(String clientId, String redirectUrl, String clientSecret) {
