@@ -235,7 +235,20 @@ public class Authenticator {
 		 * @return This builder
 		 */
 		public Builder customAzureApplication(String clientId, String redirectUrl) {
-			customAzureApplication = Optional.of(new AzureApplication(clientId, redirectUrl));
+			customAzureApplication = Optional.of(new AzureApplication(clientId, redirectUrl, null));
+			return this;
+		}
+
+		/**
+		 * Call this if you have a custom azure application that will handle the oauth for microsoft accounts
+		 *
+		 * @param clientId The azure client id
+		 * @param redirectUrl The redirect url
+		 * @param clientSecret The client secret
+		 * @return This builder
+		 */
+		public Builder customAzureApplication(String clientId, String redirectUrl, String clientSecret) {
+			customAzureApplication = Optional.of(new AzureApplication(clientId, redirectUrl, clientSecret));
 			return this;
 		}
 		
