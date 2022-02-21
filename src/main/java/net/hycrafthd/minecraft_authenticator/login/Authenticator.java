@@ -62,7 +62,7 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
  * file.writeCompressed(outputStream);
  * 
  * // Get user
- * final Optional<User> user = authenticator.getUser();
+ * final Optional user = authenticator.getUser();
  * </pre>
  * <p>
  * You get an {@link AuthenticationFile} and an {@link Optional} with a user if there was no error and you called
@@ -96,7 +96,7 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
  * file.writeCompressed(outputStream);
  * 
  * // Get user
- * final Optional<User> user = authenticator.getUser();
+ * final Optional user = authenticator.getUser();
  * </pre>
  * <p>
  * After that save the returned {@link AuthenticationFile} again. The session should stay for a relative long time, but
