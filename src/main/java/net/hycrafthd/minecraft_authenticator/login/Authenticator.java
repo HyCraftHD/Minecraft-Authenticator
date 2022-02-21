@@ -311,7 +311,7 @@ public class Authenticator {
 	 * This runs the selected authentication tasks. If {@link Builder#shouldAuthenticate()} is not enabled it will only
 	 * resolve the {@link AuthenticationFile}. This call is blocking and can take some time if the services take a long
 	 * respond time. The default timeout time is 15 seconds per service request. Change the timeout for the services with
-	 * {@link Builder##serviceConnectTimeout(int)} and {@link Builder##serviceReadTimeout(int)}.
+	 * {@link Builder#serviceConnectTimeout(int)} and {@link Builder#serviceReadTimeout(int)}.
 	 * <p>
 	 * Please always save the {@link #getResultFile()} if it is not null, even when {@link AuthenticationException} is
 	 * thrown. This is important because when a service after the initial authentication fails the oAuth service still
