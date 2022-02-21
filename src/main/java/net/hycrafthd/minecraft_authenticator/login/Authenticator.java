@@ -14,46 +14,18 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
 
 /**
  * <p>
- * Main class to authenticate a user with minecraft services. Currently microsoft accounts are supported. <br>
- * First some information about yggdrasil and microsoft accounts:
- * </p>
- * <p>
- * For security reasons you should not store username or passwords. With the yggdrasil mojang accounts you are able to
- * just login with username and password. The data will never be stored and you should never store it too. You should
- * use the {@link AuthenticationFile} and store that file as it does not contain the password and can be used to refresh
- * the access token for minecraft.
+ * Main class to authenticate a user with minecraft services. <br>
+ * First some information about microsoft accounts:
  * </p>
  * <p>
  * Microsoft accounts use oAuth. That is why you need to use a browser to login with your microsoft account. You will
  * only get an authorization code which will be used for authentication. After the first login the
- * {@link AuthenticationFile} contains a refresh token which will be used for refreshing the authentication.
+ * {@link MicrosoftAuthenticationFile} contains a refresh token which will be used for refreshing the authentication.
  * </p>
  * <p>
  * Even though the {@link AuthenticationFile} does not contain the real login data it contains sensitive data which can
  * be used to authenticate to certain services including your minecraft account. This file should therefore be kept
  * <b>secret</b> and should not be shared with others.
- * </p>
- * <p>
- * Here is an example to on how to login into a mojang account: <br>
- * <br>
- * For the first login you need a clientToken. This is a random uuid and should stay the same for all further requests.
- * Further more you need the username (email in most cases) and the password
- * </p>
- *
- * <pre>
- * try {
- * 	final Authenticator authenticator = Authenticator.ofYggdrasil(clientToken, username, password).shouldAuthenticate().run();
- * 	final AuthenticationFile file = authenticator.getResultFile();
- * 	final Optional user = authenticator.getUser();
- * 	// write authentication file e.g. with file.write(os)
- * } catch (AuthenticationException ex) {
- * 	ex.printStackTrace();
- * }
- * </pre>
- * <p>
- * You get an {@link AuthenticationFile} and an {@link Optional} with a user if there was no error and you called
- * {@link Builder#shouldAuthenticate()} before. After that the {@link AuthenticationFile} should be stored somewhere for
- * reuse.
  * </p>
  * <p>
  * Here is an example to on how to login into a microsoft account: <br>
@@ -68,38 +40,73 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
  * </p>
  *
  * <pre>
+ * // Build authenticator
+ * final Authenticator authenticator = Authenticator.ofMicrosoft(authorizationCode).shouldAuthenticate().build();
  * try {
- * 	final Authenticator authenticator = Authenticator.ofMicrosoft(authorizationCode).shouldAuthenticate().run();
+ * 	// Run authentication
+ * 	authenticator.run();
+ * } catch (final AuthenticationException ex) {
+ * 	// Always check if result file is present when an exception is thrown
  * 	final AuthenticationFile file = authenticator.getResultFile();
- * 	final Optional user = authenticator.getUser();
- * 	// write authentication file e.g. with file.write(os)
- * } catch (AuthenticationException ex) {
- * 	ex.printStackTrace();
+ * 	if (file != null) {
+ * 		// Save authentication file
+ * 		file.writeCompressed(outputStream);
+ * 	}
+ * 	
+ * 	// Show user error or rethrow
+ * 	throw ex;
  * }
+ * 
+ * // Save authentication file
+ * final AuthenticationFile file = authenticator.getResultFile();
+ * file.writeCompressed(outputStream);
+ * 
+ * // Get user
+ * final Optional<User> user = authenticator.getUser();
  * </pre>
  * <p>
  * You get an {@link AuthenticationFile} and an {@link Optional} with a user if there was no error and you called
  * {@link Builder#shouldAuthenticate()} before. After that the {@link AuthenticationFile} should be stored somewhere for
- * reuse.
+ * reuse. If an error occurred save the {@link AuthenticationFile} as well if it is not null.
  * </p>
  * <p>
  * To refresh a session you can use the saved {@link AuthenticationFile} and login like that:
  * </p>
  *
  * <pre>
+ * // Build authenticator
+ * final Authenticator authenticator = Authenticator.of(authFile).shouldAuthenticate().build();
  * try {
- * 	final Authenticator authenticator = Authenticator.of(authFile).shouldAuthenticate().run();
+ * 	// Run authentication
+ * 	authenticator.run();
+ * } catch (final AuthenticationException ex) {
+ * 	// Always check if result file is present when an exception is thrown
  * 	final AuthenticationFile file = authenticator.getResultFile();
- * 	final Optional user = authenticator.getUser();
- * 	// write authentication file e.g. with file.write(os)
- * } catch (AuthenticationException ex) {
- * 	ex.printStackTrace();
+ * 	if (file != null) {
+ * 		// Save authentication file
+ * 		file.writeCompressed(outputStream);
+ * 	}
+ * 	
+ * 	// Show user error or rethrow
+ * 	throw ex;
  * }
+ * 
+ * // Save authentication file
+ * final AuthenticationFile file = authenticator.getResultFile();
+ * file.writeCompressed(outputStream);
+ * 
+ * // Get user
+ * final Optional<User> user = authenticator.getUser();
  * </pre>
  * <p>
  * After that save the returned {@link AuthenticationFile} again. The session should stay for a relative long time, but
  * will be destroyed by certain events e.g. other client token, logout of all sessions, etc. The error message will tell
  * you why the user cannot be authenticated. If a token is not valid anymore the user must relogin.
+ * </p>
+ * <p>
+ * If you need xbox profile settings call {@link Builder#shouldRetrieveXBoxProfile()} and
+ * {@link Builder#shouldAuthenticate()} when building the {@link Authenticator}. If the login was successful an
+ * {@link XBoxProfile} can be retrieved from {@link #getXBoxProfile()}.
  * </p>
  */
 public class Authenticator {
