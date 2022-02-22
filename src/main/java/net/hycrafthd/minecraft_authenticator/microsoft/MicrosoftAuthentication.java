@@ -18,7 +18,7 @@ public class MicrosoftAuthentication {
 			final String clientId = azureApplication.clientId();
 			final String redirectUrl = azureApplication.redirectUrl();
 			final String clientSecret = azureApplication.clientSecret();
-
+			
 			microsoftResponse = MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, clientSecret, authorizationCode, timeoutValues);
 		} else {
 			microsoftResponse = MicrosoftService.oAuthTokenFromCode(authorizationCode, timeoutValues);
@@ -39,7 +39,7 @@ public class MicrosoftAuthentication {
 			final String clientId = azureApplication.clientId();
 			final String redirectUrl = azureApplication.redirectUrl();
 			final String clientSecret = azureApplication.clientSecret();
-
+			
 			return MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, clientSecret, retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues);
 		} else {
 			return MicrosoftLoginRoutine.loginWithRefreshToken(retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues);

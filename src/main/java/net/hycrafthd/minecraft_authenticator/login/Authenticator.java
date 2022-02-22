@@ -56,11 +56,11 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
  * 	// Show user error or rethrow
  * 	throw ex;
  * }
- * 
+ *
  * // Save authentication file
  * final AuthenticationFile file = authenticator.getResultFile();
  * file.writeCompressed(outputStream);
- * 
+ *
  * // Get user
  * final Optional user = authenticator.getUser();
  * </pre>
@@ -90,11 +90,11 @@ import net.hycrafthd.minecraft_authenticator.util.ConnectionUtil.TimeoutValues;
  * 	// Show user error or rethrow
  * 	throw ex;
  * }
- * 
+ *
  * // Save authentication file
  * final AuthenticationFile file = authenticator.getResultFile();
  * file.writeCompressed(outputStream);
- * 
+ *
  * // Get user
  * final Optional user = authenticator.getUser();
  * </pre>
@@ -219,7 +219,7 @@ public class Authenticator {
 		/**
 		 * Call this if you want to get a {@link XBoxProfile} object. Only available for microsoft accounts. Only has an effect
 		 * if {@link #shouldAuthenticate()} is called.
-		 * 
+		 *
 		 * @return This builder
 		 */
 		public Builder shouldRetrieveXBoxProfile() {
@@ -235,10 +235,10 @@ public class Authenticator {
 		 * @return This builder
 		 */
 		public Builder customAzureApplication(String clientId, String redirectUrl) {
-			customAzureApplication = Optional.of(new AzureApplication(clientId, redirectUrl, null));
+			customAzureApplication = Optional.of(new AzureApplication(clientId, redirectUrl));
 			return this;
 		}
-
+		
 		/**
 		 * Call this if you have a custom azure application that will handle the oauth for microsoft accounts
 		 *
@@ -279,7 +279,7 @@ public class Authenticator {
 		/**
 		 * Creates a new {@link Authenticator} with this configuration. To run the authenticator call
 		 * {@link Authenticator#run()}.
-		 * 
+		 *
 		 * @return Build Authenticator object
 		 */
 		public Authenticator build() {
@@ -333,7 +333,7 @@ public class Authenticator {
 	 * <p>
 	 * This method can only be called once per {@link Authenticator} object.
 	 * </p>
-	 * 
+	 *
 	 * @throws AuthenticationException Throws exception if login was not successful
 	 */
 	public void run() throws AuthenticationException {
@@ -417,7 +417,7 @@ public class Authenticator {
 	 * <p>
 	 * Can only be called after {@link #run()} was called.
 	 * </p>
-	 * 
+	 *
 	 * @return XBoxProfile. Cannot be empty if authentication and the xbox profile was requested and no
 	 *         {@link AuthenticationException} was raised
 	 */

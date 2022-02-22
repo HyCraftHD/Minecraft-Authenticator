@@ -28,17 +28,20 @@ public class MicrosoftLoginRoutine {
 		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
 	}
 	
+	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String authCode, UUID launcherClientId, TimeoutValues timeoutValues) {
+		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, clientSecret, authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	}
+	
 	public static MicrosoftLoginResponse loginWithRefreshToken(boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
 		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
 	}
-
-	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, clientSecret, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
-
-	}
-
+	
 	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
 		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	}
+	
+	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, clientSecret, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
 	}
 	
 	private static MicrosoftLoginResponse login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse, boolean retrieveXBoxProfile, UUID launcherClientId, TimeoutValues timeoutValues) {

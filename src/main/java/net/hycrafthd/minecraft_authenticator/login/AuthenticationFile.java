@@ -23,7 +23,7 @@ public abstract class AuthenticationFile {
 	
 	/**
 	 * The client id that is used for certain requests
-	 * 
+	 *
 	 * @return Client id
 	 */
 	public UUID getClientId() {
@@ -39,9 +39,7 @@ public abstract class AuthenticationFile {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if ((obj == null) || (getClass() != obj.getClass()))
 			return false;
 		AuthenticationFile other = (AuthenticationFile) obj;
 		return Objects.equals(clientId, other.clientId);
@@ -65,7 +63,7 @@ public abstract class AuthenticationFile {
 	
 	/**
 	 * Reads an {@link AuthenticationFile} from a byte array with with gzip compression.
-	 * 
+	 *
 	 * @param bytes Compressed byte array of the authentication file
 	 * @return An {@link AuthenticationFile} instance
 	 * @throws IOException Error if data could not be uncompressed or parsed
@@ -76,7 +74,7 @@ public abstract class AuthenticationFile {
 	
 	/**
 	 * Reads an {@link AuthenticationFile} from a string.
-	 * 
+	 *
 	 * @param string Serialized authentication file
 	 * @return An {@link AuthenticationFile} instance
 	 * @throws IOException Error if data could not be parsed
@@ -87,7 +85,7 @@ public abstract class AuthenticationFile {
 	
 	/**
 	 * Deserialize an {@link AuthenticationFile} from a {@link JsonObject}
-	 * 
+	 *
 	 * @param object Json object containing the {@link AuthenticationFile} data
 	 * @return An {@link AuthenticationFile} instance
 	 * @throws IOException Error if data could not be parsed
@@ -118,7 +116,7 @@ public abstract class AuthenticationFile {
 	 * to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your minecraft
 	 * session that should be kept private!
 	 * </p>
-	 * 
+	 *
 	 * @return Compressed byte array of the authentication file
 	 * @throws IOException Error if data could be be compressed
 	 */
@@ -133,7 +131,7 @@ public abstract class AuthenticationFile {
 	 * to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your minecraft
 	 * session that should be kept private!
 	 * </p>
-	 * 
+	 *
 	 * @return Serialized string of the authentication file
 	 */
 	public String writeString() {
@@ -147,7 +145,7 @@ public abstract class AuthenticationFile {
 	 * to a file). Even though this data does not contain any credentials, it contains tokens for refreshing your minecraft
 	 * session that should be kept private!
 	 * </p>
-	 * 
+	 *
 	 * @return Json object containing the {@link AuthenticationFile} data
 	 */
 	public JsonObject serialize() {

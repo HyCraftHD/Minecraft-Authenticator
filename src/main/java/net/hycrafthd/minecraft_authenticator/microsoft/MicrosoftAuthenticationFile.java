@@ -35,9 +35,7 @@ public class MicrosoftAuthenticationFile extends AuthenticationFile {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
+		if (!super.equals(obj) || (getClass() != obj.getClass()))
 			return false;
 		MicrosoftAuthenticationFile other = (MicrosoftAuthenticationFile) obj;
 		return Objects.equals(refreshToken, other.refreshToken);
