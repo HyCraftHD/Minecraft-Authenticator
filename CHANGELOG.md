@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.1] - 2022-02-22
+### Added
+ - Added client secret support for azure applications. Thanks AppleDash!
+
 ## [3.0.0] - 2022-02-20
 ### Changed
  - Rewritten most parts of the library
