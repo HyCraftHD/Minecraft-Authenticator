@@ -3,6 +3,8 @@ package net.hycrafthd.minecraft_authenticator.login;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -16,9 +18,11 @@ import net.hycrafthd.minecraft_authenticator.util.AuthenticationFileUtil;
 public abstract class AuthenticationFile {
 	
 	private final UUID clientId;
+	private final Map<String, String> extraProperties;
 	
 	protected AuthenticationFile(UUID clientId) {
 		this.clientId = clientId;
+		extraProperties = new HashMap<>();
 	}
 	
 	/**
@@ -28,6 +32,16 @@ public abstract class AuthenticationFile {
 	 */
 	public UUID getClientId() {
 		return clientId;
+	}
+	
+	/**
+	 * Extra properties that could be attached to an authentication file. They are by design mutable and can be used to
+	 * attach properties to the authentication file
+	 * 
+	 * @return Extra properties
+	 */
+	public Map<String, String> getExtraProperties() {
+		return extraProperties;
 	}
 	
 	@Override

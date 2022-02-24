@@ -16,6 +16,10 @@ public class MicrosoftAuthenticationFileSerializer {
 		
 		object.addProperty("refreshToken", authFile.getRefreshToken());
 		
+		final JsonObject extraPropertiesObject = new JsonObject();
+		authFile.getExtraProperties().forEach(extraPropertiesObject::addProperty);
+		object.add("extraProperties", extraPropertiesObject);
+		
 		return object;
 	}
 	
@@ -27,7 +31,16 @@ public class MicrosoftAuthenticationFileSerializer {
 		
 		final String refreshToken = object.get("refreshToken").getAsString();
 		
-		return new MicrosoftAuthenticationFile(clientId, refreshToken);
+		final MicrosoftAuthenticationFile file = new MicrosoftAuthenticationFile(clientId, refreshToken);
+		
+		final JsonObject extraPropertiesObject = object.getAsJsonObject("extraProperties");
+		if (extraPropertiesObject != null) {
+			extraPropertiesObject.keySet().forEach(key -> {
+				file.getExtraProperties().put(key, extraPropertiesObject.get(key).getAsString());
+			});
+		}
+		
+		return file;
 	}
 	
 }
