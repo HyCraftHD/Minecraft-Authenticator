@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.2] - 2022-02-24
+### Added
+ - Added option to attach extra properties to an authentication file
+
 ## [3.0.1] - 2022-02-22
 ### Added
  - Added client secret support for azure applications. Thanks AppleDash!
