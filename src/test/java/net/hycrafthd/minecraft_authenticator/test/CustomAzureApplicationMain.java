@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import net.hycrafthd.minecraft_authenticator.login.AuthenticationException;
+import net.hycrafthd.minecraft_authenticator.login.AuthenticationFile;
 import net.hycrafthd.minecraft_authenticator.login.Authenticator;
 import net.hycrafthd.minecraft_authenticator.login.User;
 import net.hycrafthd.minecraft_authenticator.login.XBoxProfile;
@@ -54,6 +55,21 @@ public class CustomAzureApplicationMain {
 			
 			final XBoxProfile xBoxProfile = authenticator.getXBoxProfile().get();
 			System.out.println(xBoxProfile);
+			
+			System.out.println("CHECK FILES ----------------------------------------------------------------");
+			
+			final AuthenticationFile file = authenticator.getResultFile();
+			file.getExtraProperties().put("type", "test");
+			
+			System.out.println(file.getExtraProperties());
+			
+			final byte[] bytes = file.writeCompressed();
+			
+			final AuthenticationFile restoredFile = AuthenticationFile.readCompressed(bytes);
+			
+			System.out.println(restoredFile.getExtraProperties());
+			
+			System.out.println(file.equals(restoredFile));
 		}
 	}
 }

@@ -61,7 +61,7 @@ public abstract class AuthenticationFile {
 	
 	@Override
 	public String toString() {
-		return "AuthenticationFile [clientId=" + clientId + "]";
+		return "AuthenticationFile [clientId=" + clientId + ", extraProperties=" + extraProperties + "]";
 	}
 	
 	/**
