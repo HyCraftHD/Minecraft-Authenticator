@@ -30,7 +30,7 @@ dependencies {
 
 group = "net.hycrafthd"
 archivesBaseName = "minecraft_authenticator"
-version = "3.0.2"
+version = "3.0.3"
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
