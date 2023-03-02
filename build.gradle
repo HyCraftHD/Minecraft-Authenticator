@@ -58,6 +58,8 @@ tasks.named("jar") {
 
 tasks.create("signJar") {
 	dependsOn tasks.named("jar")
+	mustRunAfter tasks.named("jar")
+	
 	enabled = project.hasProperty("createBuild")
 	
 	def keyStore = project.findProperty("keystore")
@@ -80,6 +82,14 @@ tasks.create("signJar") {
 tasks.named("assemble") {
 	dependsOn tasks.named("signJar")
 }
+afterEvaluate {
+	tasks.matching { task ->
+		task.group == "publishing"
+	}.each { task ->
+		println task
+		task.dependsOn("signJar")
+	}
+}
 
 tasks.withType(PublishToMavenRepository) {
 	onlyIf {
@@ -88,8 +98,6 @@ tasks.withType(PublishToMavenRepository) {
 }
 
 publishing {
-	publish.dependsOn build
-	
 	repositories {
 		maven {
 			url "https://repo.u-team.info"
