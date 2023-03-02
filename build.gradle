@@ -87,7 +87,6 @@ afterEvaluate {
 	tasks.matching { task ->
 		task.group == "publishing"
 	}.each { task ->
-		println task
 		task.dependsOn("signJar")
 	}
 }
