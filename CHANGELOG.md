@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.3] - 2023-03-02
+### Added
+ - Jar artifact is now signed
+ - Add module file
+
 ## [3.0.2] - 2022-02-24
 ### Added
  - Added option to attach extra properties to an authentication file
