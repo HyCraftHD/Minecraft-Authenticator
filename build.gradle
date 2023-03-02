@@ -58,6 +58,7 @@ tasks.named("jar") {
 
 tasks.create("signJar") {
 	dependsOn tasks.named("jar")
+	enabled = project.hasProperty("createBuild")
 	
 	def keyStore = project.findProperty("keystore")
 	def alias = project.findProperty("keystore.alias")
