@@ -51,7 +51,8 @@ tasks.named("jar") {
 		attributes (
 				"Implementation-Version": project.version,
 				"Implementation-Vendor": "HyCraftHD, Luc_ZZ",
-				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+				"Fingerprint": project.findProperty("keystore.fingerprint") ?: "NONE",
 				)
 	}
 }
