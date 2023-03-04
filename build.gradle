@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-	implementation group: "com.google.code.gson", name: "gson", version: config.gson.version
+	api group: "com.google.code.gson", name: "gson", version: config.gson.version
 }
 
 group = "net.hycrafthd"
