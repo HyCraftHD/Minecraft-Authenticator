@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.4] - 2023-03-04
+### Added
+ - Fix gson dependency publishing in maven
+ - Expose function package in module
+
 ## [3.0.3] - 2023-03-02
 ### Added
  - Jar artifact is now signed
