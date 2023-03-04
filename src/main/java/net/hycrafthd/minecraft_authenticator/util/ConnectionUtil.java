@@ -15,6 +15,8 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import net.hycrafthd.minecraft_authenticator.Constants;
+import net.hycrafthd.minecraft_authenticator.util.function.ConsumerWithIOException;
+import net.hycrafthd.minecraft_authenticator.util.function.FunctionWithIOException;
 
 public class ConnectionUtil {
 	

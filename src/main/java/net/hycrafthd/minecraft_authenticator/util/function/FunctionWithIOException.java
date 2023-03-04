@@ -1,4 +1,4 @@
-package net.hycrafthd.minecraft_authenticator.util;
+package net.hycrafthd.minecraft_authenticator.util.function;
 
 import java.io.IOException;
 
