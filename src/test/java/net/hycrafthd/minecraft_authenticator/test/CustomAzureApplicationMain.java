@@ -43,7 +43,7 @@ public class CustomAzureApplicationMain {
 					.build();
 			
 			try {
-				authenticator.run();
+				authenticator.run(state -> System.out.println("Login state: " + state));
 			} catch (final AuthenticationException ex) {
 				ex.printStackTrace(System.out);
 				System.out.println("Updated auth file: " + authenticator.getResultFile());

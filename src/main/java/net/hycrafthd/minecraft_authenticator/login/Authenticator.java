@@ -337,19 +337,41 @@ public class Authenticator {
 	 * @throws AuthenticationException Throws exception if login was not successful
 	 */
 	public void run() throws AuthenticationException {
+		run(LoginStateCallback.NOOP);
+	}
+	
+	/**
+	 * This runs the selected authentication tasks. If {@link Builder#shouldAuthenticate()} is not enabled it will only
+	 * resolve the {@link AuthenticationFile}. This call is blocking and can take some time if the services take a long
+	 * respond time. The default timeout time is 15 seconds per service request. Change the timeout for the services with
+	 * {@link Builder#serviceConnectTimeout(int)} and {@link Builder#serviceReadTimeout(int)}.
+	 * <p>
+	 * Please always save the {@link #getResultFile()} if it is not null, even when {@link AuthenticationException} is
+	 * thrown. This is important because when a service after the initial authentication fails the oAuth service still
+	 * requires the updated tokens.
+	 * </p>
+	 * <p>
+	 * This method can only be called once per {@link Authenticator} object.
+	 * </p>
+	 *
+	 * @param callback Login state callback for information messages. Call is on thread and should not block too long
+	 * @throws AuthenticationException Throws exception if login was not successful
+	 */
+	public void run(LoginStateCallback callback) throws AuthenticationException {
 		if (hasRun) {
 			throw new IllegalStateException("Cannot run the authentication multiple times");
 		}
 		hasRun = true;
 		
 		// Resolve the initial file
+		callback.call(LoginState.INITAL_FILE);
 		resultFile = fileFunction.get(customAzureApplication, timeoutValues);
 		
 		// Authentication
 		if (authenticate) {
 			// Microsoft authentication
 			if (resultFile instanceof final MicrosoftAuthenticationFile microsoftFile) {
-				final MicrosoftLoginResponse response = MicrosoftAuthentication.authenticate(customAzureApplication, retrieveXBoxProfile, microsoftFile, timeoutValues);
+				final MicrosoftLoginResponse response = MicrosoftAuthentication.authenticate(customAzureApplication, retrieveXBoxProfile, microsoftFile, timeoutValues, callback);
 				
 				// Set new result file
 				if (response.hasRefreshToken()) {
@@ -461,5 +483,25 @@ public class Authenticator {
 		 * @throws AuthenticationException Throws if authentication file is created with an online service with authentication
 		 */
 		AuthenticationFile get(Optional<AzureApplication> customAzureApplication, TimeoutValues timeoutValues) throws AuthenticationException;
+	}
+	
+	/**
+	 * Functions that takes a {@link LoginState} as parameter. Can be used to display the current login state
+	 */
+	@FunctionalInterface
+	public interface LoginStateCallback {
+		
+		/**
+		 * Default callback
+		 */
+		static LoginStateCallback NOOP = state -> {
+		};
+		
+		/**
+		 * Consumes a {@link LoginState}
+		 * 
+		 * @param state Current Login State
+		 */
+		void call(LoginState state);
 	}
 }

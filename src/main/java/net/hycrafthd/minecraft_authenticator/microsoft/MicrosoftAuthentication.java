@@ -3,6 +3,8 @@ package net.hycrafthd.minecraft_authenticator.microsoft;
 import java.util.Optional;
 import java.util.UUID;
 
+import net.hycrafthd.minecraft_authenticator.login.LoginState;
+import net.hycrafthd.minecraft_authenticator.login.Authenticator.LoginStateCallback;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthErrorResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.api.OAuthTokenResponse;
 import net.hycrafthd.minecraft_authenticator.microsoft.service.MicrosoftResponse;
@@ -33,16 +35,17 @@ public class MicrosoftAuthentication {
 		return new MicrosoftAuthenticationFile(UUID.randomUUID(), response.getRefreshToken());
 	}
 	
-	public static MicrosoftLoginResponse authenticate(Optional<AzureApplication> customAzureApplication, boolean retrieveXBoxProfile, MicrosoftAuthenticationFile file, TimeoutValues timeoutValues) {
+	public static MicrosoftLoginResponse authenticate(Optional<AzureApplication> customAzureApplication, boolean retrieveXBoxProfile, MicrosoftAuthenticationFile file, TimeoutValues timeoutValues, LoginStateCallback callback) {
+		callback.call(LoginState.LOGIN_MICOSOFT);
 		if (customAzureApplication.isPresent()) {
 			final AzureApplication azureApplication = customAzureApplication.get();
 			final String clientId = azureApplication.clientId();
 			final String redirectUrl = azureApplication.redirectUrl();
 			final String clientSecret = azureApplication.clientSecret();
 			
-			return MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, clientSecret, retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues);
+			return MicrosoftLoginRoutine.loginWithRefreshToken(clientId, redirectUrl, clientSecret, retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues, callback);
 		} else {
-			return MicrosoftLoginRoutine.loginWithRefreshToken(retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues);
+			return MicrosoftLoginRoutine.loginWithRefreshToken(retrieveXBoxProfile, file.getRefreshToken(), file.getClientId(), timeoutValues, callback);
 		}
 	}
 	

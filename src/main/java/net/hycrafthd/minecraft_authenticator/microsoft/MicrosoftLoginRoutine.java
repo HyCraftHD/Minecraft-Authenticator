@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.hycrafthd.minecraft_authenticator.login.Authenticator.LoginStateCallback;
+import net.hycrafthd.minecraft_authenticator.login.LoginState;
 import net.hycrafthd.minecraft_authenticator.login.User;
 import net.hycrafthd.minecraft_authenticator.login.XBoxProfile;
 import net.hycrafthd.minecraft_authenticator.login.XBoxProfile.XBoxProfileSettings;
@@ -20,31 +22,31 @@ import net.hycrafthd.minecraft_authenticator.util.ParseUtil;
 
 public class MicrosoftLoginRoutine {
 	
-	public static MicrosoftLoginResponse loginWithAuthCode(boolean retrieveXBoxProfile, String authCode, UUID launcherClientId, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromCode(authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	public static MicrosoftLoginResponse loginWithAuthCode(boolean retrieveXBoxProfile, String authCode, UUID launcherClientId, TimeoutValues timeoutValues, LoginStateCallback callback) {
+		return login(MicrosoftService.oAuthTokenFromCode(authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues, callback);
 	}
 	
-	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, boolean retrieveXBoxProfile, String authCode, UUID launcherClientId, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, boolean retrieveXBoxProfile, String authCode, UUID launcherClientId, TimeoutValues timeoutValues, LoginStateCallback callback) {
+		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues, callback);
 	}
 	
-	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String authCode, UUID launcherClientId, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, clientSecret, authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	public static MicrosoftLoginResponse loginWithAuthCode(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String authCode, UUID launcherClientId, TimeoutValues timeoutValues, LoginStateCallback callback) {
+		return login(MicrosoftService.oAuthTokenFromCode(clientId, redirectUrl, clientSecret, authCode, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues, callback);
 	}
 	
-	public static MicrosoftLoginResponse loginWithRefreshToken(boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	public static MicrosoftLoginResponse loginWithRefreshToken(boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues, LoginStateCallback callback) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues, callback);
 	}
 	
-	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues, LoginStateCallback callback) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues, callback);
 	}
 	
-	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues) {
-		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, clientSecret, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues);
+	public static MicrosoftLoginResponse loginWithRefreshToken(String clientId, String redirectUrl, String clientSecret, boolean retrieveXBoxProfile, String refreshToken, UUID launcherClientId, TimeoutValues timeoutValues, LoginStateCallback callback) {
+		return login(MicrosoftService.oAuthTokenFromRefreshToken(clientId, redirectUrl, clientSecret, refreshToken, timeoutValues), retrieveXBoxProfile, launcherClientId, timeoutValues, callback);
 	}
 	
-	private static MicrosoftLoginResponse login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse, boolean retrieveXBoxProfile, UUID launcherClientId, TimeoutValues timeoutValues) {
+	private static MicrosoftLoginResponse login(MicrosoftResponse<OAuthTokenResponse, OAuthErrorResponse> oAuthResponse, boolean retrieveXBoxProfile, UUID launcherClientId, TimeoutValues timeoutValues, LoginStateCallback callback) {
 		// Check for oAuth exceptions
 		if (oAuthResponse.hasException()) {
 			return exception("Cannot get oAuth token", oAuthResponse.getException().get(), Optional.empty());
@@ -54,6 +56,7 @@ public class MicrosoftLoginRoutine {
 		final var oAuth = successResponse(oAuthResponse);
 		
 		// Retrieve xbox live auth token
+		callback.call(LoginState.XBL_TOKEN);
 		final var xblResponse = MicrosoftService.xblAuthenticate(oAuth.getAccessToken(), timeoutValues);
 		if (xblResponse.hasException()) {
 			return exception("Cannot authenticate with xbl", xblResponse.getException().get(), oAuth);
@@ -63,6 +66,7 @@ public class MicrosoftLoginRoutine {
 		final var xbl = successResponse(xblResponse);
 		
 		// Retrieve minecraft service token
+		callback.call(LoginState.XSTS_TOKEN);
 		final var minecraftXstsResponse = MicrosoftService.xstsAuthorize(xbl.getToken(), "rp://api.minecraftservices.com/", xbl.getDisplayClaims(), timeoutValues);
 		if (minecraftXstsResponse.hasException()) {
 			return exception("Cannot authorize with xsts for minecraft services", minecraftXstsResponse.getException().get(), oAuth);
@@ -72,6 +76,7 @@ public class MicrosoftLoginRoutine {
 		final var minecraftXsts = successResponse(minecraftXstsResponse);
 		
 		// Retrieve access token for minecraft
+		callback.call(LoginState.ACCESS_TOKEN);
 		final var minecraftLoginResponse = MicrosoftService.minecraftLaucherLogin(minecraftXsts.getToken(), minecraftXsts.getDisplayClaims(), timeoutValues);
 		if (minecraftLoginResponse.hasException()) {
 			return exception("Cannot login into minecraft with xbox", minecraftLoginResponse.getException().get(), oAuth);
@@ -81,6 +86,7 @@ public class MicrosoftLoginRoutine {
 		final var minecraftLogin = successResponse(minecraftLoginResponse);
 		
 		// Retrieve entitlement for playing minecraft
+		callback.call(LoginState.ENTITLEMENT);
 		final var minecraftHasPurchasedResponse = MicrosoftService.minecraftHasPurchased(minecraftLogin.getAccessToken(), launcherClientId, timeoutValues);
 		if (minecraftHasPurchasedResponse.hasException()) {
 			return exception("Cannot get purchase data for minecraft", minecraftHasPurchasedResponse.getException().get(), oAuth);
@@ -95,6 +101,7 @@ public class MicrosoftLoginRoutine {
 		}
 		
 		// Retrieve minecraft profile
+		callback.call(LoginState.PROFILE);
 		final var minecraftProfileResponse = MicrosoftService.minecraftProfile(minecraftLogin.getAccessToken(), timeoutValues);
 		if (minecraftProfileResponse.hasException()) {
 			return exception("Cannot get minecraft profile data", minecraftProfileResponse.getException().get(), oAuth);
@@ -124,6 +131,7 @@ public class MicrosoftLoginRoutine {
 		final Optional<XBoxProfile> xBoxProfile;
 		if (retrieveXBoxProfile) {
 			// Retrieve xbox service token
+			callback.call(LoginState.XBOX_PROFILE);
 			final var xBoxXstsResponse = MicrosoftService.xstsAuthorize(xbl.getToken(), "http://xboxlive.com", xbl.getDisplayClaims(), timeoutValues);
 			if (xBoxXstsResponse.hasException()) {
 				return exception("Cannot authorize with xsts for xbox services", xBoxXstsResponse.getException().get(), oAuth);
