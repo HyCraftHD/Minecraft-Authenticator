@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.5] - 2023-05-19
+### Added
+ - Added callback for login states
+
 ## [3.0.4] - 2023-03-04
 ### Added
  - Fix gson dependency publishing in maven
