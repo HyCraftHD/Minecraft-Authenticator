@@ -15,6 +15,7 @@ This project requires gson and java 17 as dependency.
 To include this project you can use the maven build of this project which will resolve all required dependencies automatically.
 The latest version is the latest tag in github.
 
+## Gradle
 ```gradle
 repositories {
 	maven {
@@ -25,6 +26,23 @@ repositories {
 dependencies {
 	implementation "net.hycrafthd:minecraft_authenticator:XYZ"
 }
+```
+## Maven
+```xml
+<repositories>
+  <repository>
+    <id>u-team-repo</id>
+    <url>https://repo.u-team.info/</url>
+  </repository>
+</repositories>
+
+<dependencies>
+  <dependency>
+    <groupId>net.hycrafthd</groupId>
+    <artifactId>minecraft_authenticator</artifactId>
+    <version>3.0.2</version>
+  </dependency>
+</dependencies>
 ```
 
 # Usage
