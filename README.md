@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-	implementation "net.hycrafthd:minecraft_authenticator:XYZ"
+	implementation "net.hycrafthd:minecraft_authenticator:3.0.5"
 }
 ```
 ## Maven
@@ -40,7 +40,7 @@ dependencies {
   <dependency>
     <groupId>net.hycrafthd</groupId>
     <artifactId>minecraft_authenticator</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.5</version>
   </dependency>
 </dependencies>
 ```
