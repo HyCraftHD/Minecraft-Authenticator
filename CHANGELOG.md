@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.6] - 2023-09-14
+### Changed
+ - Fixed missing opens directive in module-info. Thanks shirosaka
+
 ## [3.0.5] - 2023-05-19
 ### Added
  - Added callback for login states
